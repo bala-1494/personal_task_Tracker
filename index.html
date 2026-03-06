@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trakr — Habits &amp; Tasks</title>
+  <style>
+    /* ─────────────────────────────────────────────
+       Reset & Variables
+    ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #0f1117;
+      --surface:    #1a1d27;
+      --surface2:   #22263a;
+      --border:     #2e3250;
+      --text:       #e8eaf6;
+      --text-muted: #6b7280;
+      --accent:     #6c63ff;
+      --accent2:    #a78bfa;
+      --red:        #ef4444;
+      --amber:      #f59e0b;
+      --green:      #22c55e;
+      --red-soft:   rgba(239,68,68,0.15);
+      --amber-soft: rgba(245,158,11,0.15);
+      --green-soft: rgba(34,197,94,0.15);
+      --accent-soft:rgba(108,99,255,0.15);
+      --radius:     14px;
+      --radius-sm:  8px;
+      --shadow:     0 4px 24px rgba(0,0,0,0.4);
+      --transition: 0.2s ease;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100dvh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─────────────────────────────────────────────
+       Utilities
+    ───────────────────────────────────────────── */
+    .hidden { display: none !important; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+    /* ─────────────────────────────────────────────
+       WELCOME SCREEN
+    ───────────────────────────────────────────── */
+    #welcome-screen {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: radial-gradient(ellipse at 60% 30%, rgba(108,99,255,0.18) 0%, transparent 70%),
+                  radial-gradient(ellipse at 20% 80%, rgba(167,139,250,0.12) 0%, transparent 60%),
+                  var(--bg);
+      text-align: center;
+    }
+
+    .welcome-logo {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 8px 32px rgba(108,99,255,0.4);
+    }
+
+    .welcome-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .welcome-tagline {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 3rem;
+    }
+
+    .welcome-form {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .welcome-form label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-align: left;
+    }
+
+    .welcome-input {
+      width: 100%;
+      padding: 0.9rem 1.1rem;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 1.05rem;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .welcome-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.2);
+    }
+
+    .welcome-input::placeholder { color: var(--text-muted); }
+
+    .btn-primary {
+      padding: 0.9rem 1.5rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity var(--transition), transform var(--transition);
+      letter-spacing: 0.01em;
+    }
+
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    /* ─────────────────────────────────────────────
+       MAIN APP SHELL
+    ───────────────────────────────────────────── */
+    #app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .app-header {
+      padding: 1.25rem 1.25rem 0.5rem;
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .greeting {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    /* Tab Bar */
+    .tab-bar {
+      display: flex;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      margin: 0.75rem 0 0;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.75rem 0.5rem;
+      background: none;
+      border: none;
+      border-bottom: 2.5px solid transparent;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color var(--transition), border-color var(--transition);
+      letter-spacing: 0.01em;
+    }
+
+    .tab-btn.active {
+      color: var(--accent2);
+      border-bottom-color: var(--accent2);
+    }
+
+    /* Tab content */
+    .tab-panel {
+      display: none;
+      flex: 1;
+      padding: 1.25rem;
+      padding-bottom: 5rem; /* room for FAB */
+      overflow-y: auto;
+    }
+
+    .tab-panel.active { display: block; }
+
+    /* ─────────────────────────────────────────────
+       DASHBOARD
+    ───────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    /* Progress Ring */
+    .ring-container {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .ring-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .ring-svg { transform: rotate(-90deg); }
+
+    .ring-bg {
+      fill: none;
+      stroke: var(--surface2);
+      stroke-width: 8;
+    }
+
+    .ring-progress {
+      fill: none;
+      stroke: url(#ringGrad);
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .ring-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .ring-count {
+      font-size: 1.3rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .ring-pct {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .ring-info h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .ring-info p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Task counters */
+    .task-counters {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+
+    .counter-pill {
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 0.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+      border: 1px solid var(--border);
+    }
+
+    .counter-pill:hover { background: var(--border); transform: translateY(-2px); }
+
+    .counter-num {
+      font-size: 1.6rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+
+    .counter-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .counter-pill.overdue .counter-num { color: var(--red); }
+    .counter-pill.today   .counter-num { color: var(--amber); }
+    .counter-pill.upcoming .counter-num { color: var(--green); }
+
+    /* Streak Banner */
+    .streak-banner {
+      background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.1));
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .streak-fire { font-size: 1.75rem; line-height: 1; }
+
+    .streak-text { font-size: 0.95rem; font-weight: 600; }
+
+    .streak-text span { color: var(--amber); font-size: 1.1rem; font-weight: 800; }
+
+    /* Empty states */
+    .empty-state {
+      padding: 1.5rem 0;
+      text-align: center;
+    }
+
+    .empty-state p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-link {
+      color: var(--accent2);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* ─────────────────────────────────────────────
+       BEHAVIOURS TAB
+    ───────────────────────────────────────────── */
+    .tab-date {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .behaviour-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .behaviour-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      transition: opacity var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .behaviour-item.completed { opacity: 0.6; }
+
+    .behaviour-item.completed .b-name {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    /* Custom checkbox */
+    .b-checkbox {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition), border-color var(--transition), transform 0.15s ease;
+      position: relative;
+    }
+
+    .b-checkbox.checked {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-color: transparent;
+    }
+
+    .b-checkbox.pop {
+      animation: checkPop 0.3s ease;
+    }
+
+    @keyframes checkPop {
+      0%  { transform: scale(1); }
+      50% { transform: scale(1.35); }
+      100%{ transform: scale(1); }
+    }
+
+    .b-checkbox svg {
+      width: 12px;
+      height: 12px;
+      stroke: #fff;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    .b-checkbox.checked svg { opacity: 1; }
+
+    .b-info { flex: 1; min-width: 0; }
+
+    .b-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.35rem;
+      transition: color var(--transition);
+    }
+
+    /* 7-day dots */
+    .dots-row {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot.filled  { background: var(--accent2); }
+    .dot.missed  { background: var(--surface2); border: 1px solid var(--border); }
+    .dot.na      { background: var(--surface2); opacity: 0.4; }
+    .dot.today-dot { border: 1.5px solid var(--accent2); background: transparent; }
+
+    /* Delete button on behaviour */
+    .b-delete {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity var(--transition), color var(--transition);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .behaviour-item:hover .b-delete { opacity: 1; }
+    .b-delete:hover { color: var(--red); }
+
+    /* ─────────────────────────────────────────────
+       TASKS TAB
+    ───────────────────────────────────────────── */
+    .tasks-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.1rem;
+    }
+
+    .show-completed-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 600;
+      padding: 0.3rem 0.6rem;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+
+    .show-completed-toggle:hover { background: var(--surface2); }
+
+    .toggle-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: background var(--transition);
+    }
+
+    .show-completed-toggle.active .toggle-dot { background: var(--green); }
+
+    .section-header {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 0.4rem 0;
+      margin-bottom: 0.5rem;
+      margin-top: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .section-header.overdue-hdr { color: var(--red); }
+    .section-header.today-hdr   { color: var(--amber); }
+    .section-header.upcoming-hdr { color: var(--green); }
+    .section-header.done-hdr    { color: var(--text-muted); }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .task-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      transition: opacity var(--transition);
+    }
+
+    .task-item.overdue-item  { border-left: 3px solid var(--red); }
+    .task-item.today-item    { border-left: 3px solid var(--amber); }
+    .task-item.upcoming-item { border-left: 3px solid var(--green); }
+    .task-item.done-item     { opacity: 0.5; }
+    .task-item.done-item .task-name { text-decoration: line-through; color: var(--text-muted); }
+
+    .t-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 2px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition), border-color var(--transition), transform 0.15s ease;
+    }
+
+    .t-checkbox.checked {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .t-checkbox.pop { animation: checkPop 0.3s ease; }
+
+    .t-checkbox svg {
+      width: 11px;
+      height: 11px;
+      stroke: #fff;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    .t-checkbox.checked svg { opacity: 1; }
+
+    .task-body { flex: 1; min-width: 0; }
+
+    .task-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .priority-pill {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 20px;
+    }
+
+    .priority-pill.high   { background: var(--red-soft);   color: var(--red); }
+    .priority-pill.medium { background: var(--amber-soft);  color: var(--amber); }
+    .priority-pill.low    { background: var(--green-soft);  color: var(--green); }
+
+    .task-due {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .t-delete {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity var(--transition), color var(--transition);
+      flex-shrink: 0;
+      margin-top: -2px;
+    }
+
+    .task-item:hover .t-delete { opacity: 1; }
+    .t-delete:hover { color: var(--red); }
+
+    /* ─────────────────────────────────────────────
+       FAB
+    ───────────────────────────────────────────── */
+    .fab {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 50%;
+      transform: translateX(50%);
+      width: calc(min(480px,100vw) - 2.5rem);
+      max-width: 435px;
+      padding: 0.85rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(108,99,255,0.45);
+      transition: opacity var(--transition), transform var(--transition);
+      z-index: 20;
+      letter-spacing: 0.01em;
+    }
+
+    .fab:hover { opacity: 0.92; transform: translateX(50%) translateY(-2px); }
+
+    /* ─────────────────────────────────────────────
+       MODAL / BOTTOM SHEET
+    ───────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-sheet {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom));
+      width: 100%;
+      max-width: 480px;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .modal-overlay.open .modal-sheet { transform: translateY(0); }
+
+    .modal-drag {
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 1.25rem;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.01em;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .form-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.18);
+    }
+
+    .form-input::placeholder { color: var(--text-muted); }
+
+    /* Priority selector */
+    .priority-selector {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .priority-option {
+      flex: 1;
+      padding: 0.55rem;
+      text-align: center;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: all var(--transition);
+      background: var(--surface2);
+      color: var(--text-muted);
+    }
+
+    .priority-option.selected-high   { background: var(--red-soft);   color: var(--red);   border-color: var(--red); }
+    .priority-option.selected-medium { background: var(--amber-soft);  color: var(--amber); border-color: var(--amber); }
+    .priority-option.selected-low    { background: var(--green-soft);  color: var(--green); border-color: var(--green); }
+
+    /* ─────────────────────────────────────────────
+       Scrollbar
+    ───────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     WELCOME SCREEN
+══════════════════════════════════════════════ -->
+<div id="welcome-screen">
+  <div class="welcome-logo">&#9997;&#65039;</div>
+  <h1 class="welcome-title">Trakr</h1>
+  <p class="welcome-tagline">Track your habits. Tame your tasks.</p>
+  <form class="welcome-form" id="welcome-form" novalidate>
+    <label for="username-input">What should we call you?</label>
+    <input
+      type="text"
+      id="username-input"
+      class="welcome-input"
+      placeholder="Your name…"
+      maxlength="40"
+      autocomplete="off"
+      autofocus
+    />
+    <button type="submit" class="btn-primary" id="welcome-btn" disabled>Let's Begin &rarr;</button>
+  </form>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════════════ -->
+<div id="app" class="hidden">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="greeting" id="greeting">Good morning, friend</div>
+    <nav class="tab-bar" role="tablist">
+      <button class="tab-btn active" role="tab" data-tab="dashboard">Dashboard</button>
+      <button class="tab-btn" role="tab" data-tab="behaviours">Behaviours</button>
+      <button class="tab-btn" role="tab" data-tab="tasks">Tasks</button>
+    </nav>
+  </header>
+
+  <!-- ── DASHBOARD TAB ── -->
+  <section id="tab-dashboard" class="tab-panel active" role="tabpanel">
+
+    <!-- Streak banner (hidden until streak >= 2) -->
+    <div class="streak-banner hidden" id="streak-banner">
+      <div class="streak-fire">&#128293;</div>
+      <div class="streak-text"><span id="streak-num">0</span>-day behaviour streak! Keep it up.</div>
+    </div>
+
+    <!-- Behaviour Progress Card -->
+    <div class="card" id="dash-behaviour-card">
+      <div class="card-label">Behaviour Progress</div>
+      <div id="dash-behaviour-content"></div>
+    </div>
+
+    <!-- Task Overview Card -->
+    <div class="card" id="dash-task-card">
+      <div class="card-label">Task Overview</div>
+      <div id="dash-task-content"></div>
+    </div>
+
+  </section>
+
+  <!-- ── BEHAVIOURS TAB ── -->
+  <section id="tab-behaviours" class="tab-panel hidden" role="tabpanel">
+    <div class="tab-date" id="behaviour-date"></div>
+    <div class="behaviour-list" id="behaviour-list"></div>
+    <div class="empty-state hidden" id="behaviour-empty">
+      <p>No behaviours yet.</p>
+      <span class="empty-link" id="add-behaviour-empty-link">+ Add your first behaviour</span>
+    </div>
+    <button class="fab" id="fab-behaviour">+ Add Behaviour</button>
+  </section>
+
+  <!-- ── TASKS TAB ── -->
+  <section id="tab-tasks" class="tab-panel hidden" role="tabpanel">
+    <div class="tasks-header">
+      <div class="tab-date" id="task-date" style="margin-bottom:0"></div>
+      <button class="show-completed-toggle" id="show-completed-btn">
+        <span class="toggle-dot"></span>
+        <span id="show-completed-label">Show completed</span>
+      </button>
+    </div>
+    <div id="task-list-container"></div>
+    <div class="empty-state hidden" id="task-empty">
+      <p>No tasks yet.</p>
+      <span class="empty-link" id="add-task-empty-link">+ Add your first task</span>
+    </div>
+    <button class="fab" id="fab-task">+ Add Task</button>
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ADD BEHAVIOUR MODAL
+══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="behaviour-modal" role="dialog" aria-modal="true" aria-label="Add Behaviour">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div class="modal-title">New Behaviour</div>
+    <form id="behaviour-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="b-name-input">Behaviour name</label>
+        <input
+          type="text"
+          id="b-name-input"
+          class="form-input"
+          placeholder="e.g. Morning walk"
+          maxlength="50"
+          autocomplete="off"
+        />
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%" id="b-submit-btn">Add Behaviour</button>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ADD TASK MODAL
+══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="task-modal" role="dialog" aria-modal="true" aria-label="Add Task">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div class="modal-title">New Task</div>
+    <form id="task-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="t-name-input">Task name</label>
+        <input
+          type="text"
+          id="t-name-input"
+          class="form-input"
+          placeholder="e.g. Submit project report"
+          maxlength="120"
+          autocomplete="off"
+        />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <div class="priority-selector" id="priority-selector">
+          <div class="priority-option" data-value="high">High</div>
+          <div class="priority-option" data-value="medium">Medium</div>
+          <div class="priority-option" data-value="low">Low</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="t-due-input">Due date</label>
+        <input
+          type="date"
+          id="t-due-input"
+          class="form-input"
+        />
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%" id="t-submit-btn">Add Task</button>
+    </form>
+  </div>
+</div>
+
+<!-- SVG defs for gradient ring -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6c63ff"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<script>
+/* ═════════════════════════════════════════════
+   CONSTANTS & HELPERS
+═════════════════════════════════════════════ */
+const STORAGE_KEYS = {
+  USERNAME:   'trakr_username',
+  BEHAVIOURS: 'trakr_behaviours',
+  TASKS:      'trakr_tasks',
+};
+
+const todayStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
+
+const formatDate = (str) => {
+  // YYYY-MM-DD → readable
+  const [y, m, d] = str.split('-').map(Number);
+  return new Date(y, m-1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+const fullDateStr = () => {
+  return new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+};
+
+const addDays = (str, n) => {
+  const [y, m, d] = str.split('-').map(Number);
+  const dt = new Date(y, m-1, d);
+  dt.setDate(dt.getDate() + n);
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+};
+
+const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+function load(key, def) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? def; }
+  catch { return def; }
+}
+function save(key, val) {
+  localStorage.setItem(key, JSON.stringify(val));
+}
+
+/* ═════════════════════════════════════════════
+   STATE
+═════════════════════════════════════════════ */
+let username   = load(STORAGE_KEYS.USERNAME, null);
+let behaviours = load(STORAGE_KEYS.BEHAVIOURS, []);
+let tasks      = load(STORAGE_KEYS.TASKS, []);
+let showCompleted = false;
+let selectedPriority = null;
+let activeTab  = 'dashboard';
+
+/* ═════════════════════════════════════════════
+   WELCOME SCREEN
+═════════════════════════════════════════════ */
+const welcomeScreen  = document.getElementById('welcome-screen');
+const appEl          = document.getElementById('app');
+const usernameInput  = document.getElementById('username-input');
+const welcomeBtn     = document.getElementById('welcome-btn');
+const welcomeForm    = document.getElementById('welcome-form');
+
+function initApp() {
+  welcomeScreen.classList.add('hidden');
+  appEl.classList.remove('hidden');
+  updateGreeting();
+  renderAll();
+}
+
+if (username) {
+  initApp();
+}
+
+usernameInput.addEventListener('input', () => {
+  welcomeBtn.disabled = usernameInput.value.trim().length === 0;
+});
+
+welcomeForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = usernameInput.value.trim();
+  if (!name) return;
+  username = name;
+  save(STORAGE_KEYS.USERNAME, username);
+  initApp();
+});
+
+/* ═════════════════════════════════════════════
+   GREETING
+═════════════════════════════════════════════ */
+function updateGreeting() {
+  const h = new Date().getHours();
+  const period = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  document.getElementById('greeting').textContent = `Good ${period}, ${username} 👋`;
+}
+
+/* ═════════════════════════════════════════════
+   TAB NAVIGATION
+═════════════════════════════════════════════ */
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabPanels = document.querySelectorAll('.tab-panel');
+
+tabBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    switchTab(tab);
+  });
+});
+
+function switchTab(tab) {
+  activeTab = tab;
+  tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  tabPanels.forEach(p => {
+    const isActive = p.id === `tab-${tab}`;
+    p.classList.toggle('active', isActive);
+    p.classList.toggle('hidden', !isActive);
+  });
+  renderAll();
+}
+
+/* ═════════════════════════════════════════════
+   RENDER: ALL
+═════════════════════════════════════════════ */
+function renderAll() {
+  renderDashboard();
+  renderBehaviours();
+  renderTasks();
+}
+
+/* ═════════════════════════════════════════════
+   STREAK CALCULATION
+   Consecutive days (going back from yesterday)
+   where at least 1 behaviour was completed.
+═════════════════════════════════════════════ */
+function calcStreak() {
+  if (behaviours.length === 0) return 0;
+  const today = todayStr();
+  let streak = 0;
+  let cursor = today;
+
+  // Include today in streak if any behaviour completed today
+  while (true) {
+    const anyDone = behaviours.some(b =>
+      (b.completedDates || []).includes(cursor)
+    );
+    if (!anyDone) break;
+    streak++;
+    cursor = addDays(cursor, -1);
+  }
+  return streak;
+}
+
+/* ═════════════════════════════════════════════
+   TASK STATS
+═════════════════════════════════════════════ */
+function getTaskStats() {
+  const today = todayStr();
+  let overdue = 0, dueToday = 0, upcoming = 0;
+  tasks.forEach(t => {
+    if (t.completed) return;
+    if (t.dueDate < today) overdue++;
+    else if (t.dueDate === today) dueToday++;
+    else upcoming++;
+  });
+  return { overdue, dueToday, upcoming };
+}
+
+/* ═════════════════════════════════════════════
+   RENDER: DASHBOARD
+═════════════════════════════════════════════ */
+function renderDashboard() {
+  // Streak
+  const streak = calcStreak();
+  const bannerEl = document.getElementById('streak-banner');
+  if (streak >= 2) {
+    document.getElementById('streak-num').textContent = streak;
+    bannerEl.classList.remove('hidden');
+  } else {
+    bannerEl.classList.add('hidden');
+  }
+
+  // Behaviour progress
+  const today = todayStr();
+  const total = behaviours.length;
+  const done  = behaviours.filter(b => (b.completedDates || []).includes(today)).length;
+  const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+  const R     = 44;
+  const C     = 2 * Math.PI * R;
+  const offset = C - (pct / 100) * C;
+
+  const bContent = document.getElementById('dash-behaviour-content');
+  if (total === 0) {
+    bContent.innerHTML = `
+      <div class="empty-state">
+        <p>No behaviours added yet.</p>
+        <span class="empty-link" id="dash-add-behaviour">Add your first behaviour &rarr;</span>
+      </div>`;
+    document.getElementById('dash-add-behaviour').addEventListener('click', () => {
+      switchTab('behaviours');
+      openBehaviourModal();
+    });
+  } else {
+    bContent.innerHTML = `
+      <div class="ring-container">
+        <div class="ring-wrap">
+          <svg class="ring-svg" width="100" height="100" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="${R}"/>
+            <circle class="ring-progress" cx="50" cy="50" r="${R}"
+              stroke-dasharray="${C.toFixed(2)}"
+              stroke-dashoffset="${offset.toFixed(2)}"/>
+          </svg>
+          <div class="ring-text">
+            <span class="ring-count">${done}/${total}</span>
+            <span class="ring-pct">${pct}%</span>
+          </div>
+        </div>
+        <div class="ring-info">
+          <h3>Today's Behaviours</h3>
+          <p>${done === total && total > 0 ? 'All done!' : `${total - done} left to go`}</p>
+        </div>
+      </div>`;
+  }
+
+  // Task overview
+  const { overdue, dueToday, upcoming } = getTaskStats();
+  const tContent = document.getElementById('dash-task-content');
+  const anyTasks = tasks.filter(t => !t.completed).length > 0;
+
+  if (tasks.length === 0) {
+    tContent.innerHTML = `
+      <div class="empty-state">
+        <p>No tasks yet.</p>
+        <span class="empty-link" id="dash-add-task">Add one &rarr;</span>
+      </div>`;
+    document.getElementById('dash-add-task').addEventListener('click', () => {
+      switchTab('tasks');
+      openTaskModal();
+    });
+  } else {
+    tContent.innerHTML = `
+      <div class="task-counters">
+        <div class="counter-pill overdue" data-goto="tasks">
+          <div class="counter-num">${overdue}</div>
+          <div class="counter-label">Overdue</div>
+        </div>
+        <div class="counter-pill today" data-goto="tasks">
+          <div class="counter-num">${dueToday}</div>
+          <div class="counter-label">Due Today</div>
+        </div>
+        <div class="counter-pill upcoming" data-goto="tasks">
+          <div class="counter-num">${upcoming}</div>
+          <div class="counter-label">Upcoming</div>
+        </div>
+      </div>`;
+    tContent.querySelectorAll('.counter-pill').forEach(pill => {
+      pill.addEventListener('click', () => switchTab('tasks'));
+    });
+  }
+}
+
+/* ═════════════════════════════════════════════
+   RENDER: BEHAVIOURS
+═════════════════════════════════════════════ */
+function renderBehaviours() {
+  document.getElementById('behaviour-date').textContent = fullDateStr();
+
+  const today = todayStr();
+  const listEl = document.getElementById('behaviour-list');
+  const emptyEl = document.getElementById('behaviour-empty');
+
+  if (behaviours.length === 0) {
+    listEl.innerHTML = '';
+    listEl.classList.add('hidden');
+    emptyEl.classList.remove('hidden');
+    return;
+  }
+
+  listEl.classList.remove('hidden');
+  emptyEl.classList.add('hidden');
+
+  // Sort: incomplete first, completed last
+  const sorted = [...behaviours].sort((a, b) => {
+    const aDone = (a.completedDates || []).includes(today);
+    const bDone = (b.completedDates || []).includes(today);
+    if (aDone === bDone) return 0;
+    return aDone ? 1 : -1;
+  });
+
+  listEl.innerHTML = sorted.map(b => {
+    const isDone = (b.completedDates || []).includes(today);
+    const dots   = buildDots(b, today);
+    return `
+      <div class="behaviour-item ${isDone ? 'completed' : ''}" data-id="${b.id}">
+        <button class="b-checkbox ${isDone ? 'checked' : ''}" data-id="${b.id}" aria-label="Toggle ${b.name}">
+          <svg viewBox="0 0 12 9"><polyline points="1,4 4.5,8 11,1"/></svg>
+        </button>
+        <div class="b-info">
+          <div class="b-name">${escHtml(b.name)}</div>
+          <div class="dots-row">${dots}</div>
+        </div>
+        <button class="b-delete" data-id="${b.id}" aria-label="Delete ${b.name}">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/>
+          </svg>
+        </button>
+      </div>`;
+  }).join('');
+
+  // Events
+  listEl.querySelectorAll('.b-checkbox').forEach(cb => {
+    cb.addEventListener('click', () => toggleBehaviour(cb.dataset.id));
+  });
+  listEl.querySelectorAll('.b-delete').forEach(btn => {
+    btn.addEventListener('click', () => deleteBehaviour(btn.dataset.id));
+  });
+}
+
+function buildDots(behaviour, today) {
+  let html = '';
+  for (let i = 6; i >= 0; i--) {
+    const day = addDays(today, -i);
+    const isToday = day === today;
+    const afterCreation = day >= behaviour.createdDate;
+
+    if (!afterCreation) {
+      html += `<span class="dot na" title="N/A"></span>`;
+    } else if (isToday) {
+      const done = (behaviour.completedDates || []).includes(day);
+      html += `<span class="dot ${done ? 'filled' : 'today-dot'}" title="Today"></span>`;
+    } else {
+      const done = (behaviour.completedDates || []).includes(day);
+      html += `<span class="dot ${done ? 'filled' : 'missed'}" title="${day}"></span>`;
+    }
+  }
+  return html;
+}
+
+/* ═════════════════════════════════════════════
+   RENDER: TASKS
+═════════════════════════════════════════════ */
+function renderTasks() {
+  document.getElementById('task-date').textContent = fullDateStr();
+
+  // Show/hide completed toggle label
+  const completedCount = tasks.filter(t => t.completed).length;
+  document.getElementById('show-completed-label').textContent =
+    `${showCompleted ? 'Hide' : 'Show'} completed (${completedCount})`;
+  document.getElementById('show-completed-btn').classList.toggle('active', showCompleted);
+
+  const today = todayStr();
+  const container = document.getElementById('task-list-container');
+  const emptyEl   = document.getElementById('task-empty');
+
+  const active = tasks.filter(t => !t.completed);
+
+  const overdue  = active.filter(t => t.dueDate < today)
+    .sort((a,b) => priorityOrder(a) - priorityOrder(b) || a.dueDate.localeCompare(b.dueDate));
+  const dueToday = active.filter(t => t.dueDate === today)
+    .sort((a,b) => priorityOrder(a) - priorityOrder(b));
+  const upcoming = active.filter(t => t.dueDate > today)
+    .sort((a,b) => priorityOrder(a) - priorityOrder(b) || a.dueDate.localeCompare(b.dueDate));
+  const completed = tasks.filter(t => t.completed);
+
+  if (tasks.length === 0) {
+    container.innerHTML = '';
+    emptyEl.classList.remove('hidden');
+    return;
+  }
+
+  emptyEl.classList.add('hidden');
+
+  let html = '';
+
+  if (overdue.length > 0) {
+    html += `<div class="section-header overdue-hdr">🔴 Overdue</div>`;
+    html += `<div class="task-list">${overdue.map(t => taskCard(t, 'overdue')).join('')}</div>`;
+  }
+
+  if (dueToday.length > 0) {
+    html += `<div class="section-header today-hdr">📅 Due Today</div>`;
+    html += `<div class="task-list">${dueToday.map(t => taskCard(t, 'today')).join('')}</div>`;
+  }
+
+  if (upcoming.length > 0) {
+    html += `<div class="section-header upcoming-hdr">📆 Upcoming</div>`;
+    html += `<div class="task-list">${upcoming.map(t => taskCard(t, 'upcoming')).join('')}</div>`;
+  }
+
+  if (overdue.length === 0 && dueToday.length === 0 && upcoming.length === 0 && completed.length > 0) {
+    html += `<div class="empty-state"><p>All tasks are done!</p></div>`;
+  }
+
+  if (showCompleted && completed.length > 0) {
+    html += `<div class="section-header done-hdr">Completed</div>`;
+    html += `<div class="task-list">${completed.map(t => taskCard(t, 'done')).join('')}</div>`;
+  }
+
+  container.innerHTML = html;
+
+  // Events
+  container.querySelectorAll('.t-checkbox').forEach(cb => {
+    cb.addEventListener('click', () => toggleTask(cb.dataset.id));
+  });
+  container.querySelectorAll('.t-delete').forEach(btn => {
+    btn.addEventListener('click', () => deleteTask(btn.dataset.id));
+  });
+}
+
+function taskCard(task, section) {
+  const isDone = section === 'done';
+  return `
+    <div class="task-item ${section}-item" data-id="${task.id}">
+      <button class="t-checkbox ${isDone ? 'checked' : ''}" data-id="${task.id}" aria-label="Toggle task">
+        <svg viewBox="0 0 12 9"><polyline points="1,4 4.5,8 11,1"/></svg>
+      </button>
+      <div class="task-body">
+        <div class="task-name">${escHtml(task.name)}</div>
+        <div class="task-meta">
+          <span class="priority-pill ${task.priority}">${task.priority}</span>
+          <span class="task-due">${formatDate(task.dueDate)}</span>
+        </div>
+      </div>
+      <button class="t-delete" data-id="${task.id}" aria-label="Delete task">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/>
+        </svg>
+      </button>
+    </div>`;
+}
+
+const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
+function priorityOrder(t) { return PRIORITY_ORDER[t.priority] ?? 3; }
+
+/* ═════════════════════════════════════════════
+   BEHAVIOUR CRUD
+═════════════════════════════════════════════ */
+function toggleBehaviour(id) {
+  const today = todayStr();
+  behaviours = behaviours.map(b => {
+    if (b.id !== id) return b;
+    const dates = b.completedDates || [];
+    const idx = dates.indexOf(today);
+    const newDates = idx >= 0
+      ? dates.filter(d => d !== today)
+      : [...dates, today];
+    return { ...b, completedDates: newDates };
+  });
+  save(STORAGE_KEYS.BEHAVIOURS, behaviours);
+  // Animate the checkbox
+  const cb = document.querySelector(`.b-checkbox[data-id="${id}"]`);
+  if (cb) {
+    cb.classList.add('pop');
+    cb.addEventListener('animationend', () => cb.classList.remove('pop'), { once: true });
+  }
+  renderAll();
+}
+
+function deleteBehaviour(id) {
+  behaviours = behaviours.filter(b => b.id !== id);
+  save(STORAGE_KEYS.BEHAVIOURS, behaviours);
+  renderAll();
+}
+
+function addBehaviour(name) {
+  const b = {
+    id: uid(),
+    name: name.trim(),
+    createdDate: todayStr(),
+    completedDates: [],
+  };
+  behaviours.push(b);
+  save(STORAGE_KEYS.BEHAVIOURS, behaviours);
+  renderAll();
+}
+
+/* ═════════════════════════════════════════════
+   TASK CRUD
+═════════════════════════════════════════════ */
+function toggleTask(id) {
+  tasks = tasks.map(t => {
+    if (t.id !== id) return t;
+    return { ...t, completed: !t.completed };
+  });
+  save(STORAGE_KEYS.TASKS, tasks);
+  // Animate
+  const cb = document.querySelector(`.t-checkbox[data-id="${id}"]`);
+  if (cb) {
+    cb.classList.add('pop');
+    cb.addEventListener('animationend', () => cb.classList.remove('pop'), { once: true });
+  }
+  renderAll();
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  save(STORAGE_KEYS.TASKS, tasks);
+  renderAll();
+}
+
+function addTask(name, priority, dueDate) {
+  const t = {
+    id: uid(),
+    name: name.trim(),
+    priority,
+    dueDate,
+    completed: false,
+    createdDate: todayStr(),
+  };
+  tasks.push(t);
+  save(STORAGE_KEYS.TASKS, tasks);
+  renderAll();
+}
+
+/* ═════════════════════════════════════════════
+   MODALS
+═════════════════════════════════════════════ */
+function openModal(id) {
+  const el = document.getElementById(id);
+  el.classList.add('open');
+  // Focus first input
+  setTimeout(() => {
+    const inp = el.querySelector('input');
+    if (inp) inp.focus();
+  }, 100);
+  // Close on overlay click
+  el.addEventListener('click', (e) => {
+    if (e.target === el) closeModal(id);
+  }, { once: true });
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Behaviour modal
+const behaviourModal = document.getElementById('behaviour-modal');
+const behaviourForm  = document.getElementById('behaviour-form');
+const bNameInput     = document.getElementById('b-name-input');
+
+function openBehaviourModal() {
+  bNameInput.value = '';
+  openModal('behaviour-modal');
+}
+
+document.getElementById('fab-behaviour').addEventListener('click', openBehaviourModal);
+document.getElementById('add-behaviour-empty-link').addEventListener('click', openBehaviourModal);
+
+behaviourForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = bNameInput.value.trim();
+  if (!name) return;
+  addBehaviour(name);
+  closeModal('behaviour-modal');
+});
+
+// Task modal
+const taskModal   = document.getElementById('task-modal');
+const taskForm    = document.getElementById('task-form');
+const tNameInput  = document.getElementById('t-name-input');
+const tDueInput   = document.getElementById('t-due-input');
+const prioSel     = document.getElementById('priority-selector');
+
+function openTaskModal() {
+  tNameInput.value = '';
+  tDueInput.value  = todayStr();
+  selectedPriority = null;
+  prioSel.querySelectorAll('.priority-option').forEach(o => {
+    o.className = 'priority-option';
+  });
+  openModal('task-modal');
+}
+
+document.getElementById('fab-task').addEventListener('click', openTaskModal);
+document.getElementById('add-task-empty-link').addEventListener('click', openTaskModal);
+
+prioSel.querySelectorAll('.priority-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    selectedPriority = opt.dataset.value;
+    prioSel.querySelectorAll('.priority-option').forEach(o => {
+      o.className = 'priority-option';
+    });
+    opt.classList.add(`selected-${selectedPriority}`);
+  });
+});
+
+taskForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = tNameInput.value.trim();
+  const due  = tDueInput.value;
+  if (!name || !selectedPriority || !due) return;
+  addTask(name, selectedPriority, due);
+  closeModal('task-modal');
+});
+
+// Show completed toggle
+document.getElementById('show-completed-btn').addEventListener('click', () => {
+  showCompleted = !showCompleted;
+  renderTasks();
+});
+
+/* ═════════════════════════════════════════════
+   SECURITY: Escape HTML
+═════════════════════════════════════════════ */
+function escHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+</script>
+</body>
+</html>
