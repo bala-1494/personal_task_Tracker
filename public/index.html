@@ -28,7 +28,6 @@
       --accent-soft:rgba(108,99,255,0.15);
       --radius:     14px;
       --radius-sm:  8px;
-      --shadow:     0 4px 24px rgba(0,0,0,0.4);
       --transition: 0.2s ease;
     }
 
@@ -42,11 +41,60 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ─────────────────────────────────────────────
-       Utilities
-    ───────────────────────────────────────────── */
     .hidden { display: none !important; }
-    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+    /* ─────────────────────────────────────────────
+       Loading overlay
+    ───────────────────────────────────────────── */
+    #loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      transition: opacity 0.3s ease;
+    }
+
+    #loading-overlay.fade-out { opacity: 0; pointer-events: none; }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─────────────────────────────────────────────
+       Error toast
+    ───────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 5.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--red);
+      color: #fff;
+      padding: 0.6rem 1.1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 400;
+      white-space: nowrap;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
 
     /* ─────────────────────────────────────────────
        WELCOME SCREEN
@@ -158,7 +206,6 @@
       margin: 0 auto;
     }
 
-    /* Header */
     .app-header {
       padding: 1.25rem 1.25rem 0.5rem;
       background: var(--bg);
@@ -173,7 +220,6 @@
       letter-spacing: -0.01em;
     }
 
-    /* Tab Bar */
     .tab-bar {
       display: flex;
       background: var(--surface);
@@ -200,12 +246,11 @@
       border-bottom-color: var(--accent2);
     }
 
-    /* Tab content */
     .tab-panel {
       display: none;
       flex: 1;
       padding: 1.25rem;
-      padding-bottom: 5rem; /* room for FAB */
+      padding-bottom: 5rem;
       overflow-y: auto;
     }
 
@@ -231,7 +276,6 @@
       margin-bottom: 1rem;
     }
 
-    /* Progress Ring */
     .ring-container {
       display: flex;
       align-items: center;
@@ -292,7 +336,6 @@
       color: var(--text-muted);
     }
 
-    /* Task counters */
     .task-counters {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -326,11 +369,10 @@
       letter-spacing: 0.07em;
     }
 
-    .counter-pill.overdue .counter-num { color: var(--red); }
-    .counter-pill.today   .counter-num { color: var(--amber); }
+    .counter-pill.overdue  .counter-num { color: var(--red); }
+    .counter-pill.today    .counter-num { color: var(--amber); }
     .counter-pill.upcoming .counter-num { color: var(--green); }
 
-    /* Streak Banner */
     .streak-banner {
       background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.1));
       border: 1px solid rgba(245,158,11,0.3);
@@ -343,12 +385,9 @@
     }
 
     .streak-fire { font-size: 1.75rem; line-height: 1; }
-
     .streak-text { font-size: 0.95rem; font-weight: 600; }
-
     .streak-text span { color: var(--amber); font-size: 1.1rem; font-weight: 800; }
 
-    /* Empty states */
     .empty-state {
       padding: 1.5rem 0;
       text-align: center;
@@ -397,17 +436,14 @@
       gap: 0.85rem;
       transition: opacity var(--transition);
       position: relative;
-      overflow: hidden;
     }
 
     .behaviour-item.completed { opacity: 0.6; }
-
     .behaviour-item.completed .b-name {
       text-decoration: line-through;
       color: var(--text-muted);
     }
 
-    /* Custom checkbox */
     .b-checkbox {
       width: 22px;
       height: 22px;
@@ -420,7 +456,6 @@
       align-items: center;
       justify-content: center;
       transition: background var(--transition), border-color var(--transition), transform 0.15s ease;
-      position: relative;
     }
 
     .b-checkbox.checked {
@@ -428,14 +463,12 @@
       border-color: transparent;
     }
 
-    .b-checkbox.pop {
-      animation: checkPop 0.3s ease;
-    }
+    .b-checkbox.pop { animation: checkPop 0.3s ease; }
 
     @keyframes checkPop {
-      0%  { transform: scale(1); }
-      50% { transform: scale(1.35); }
-      100%{ transform: scale(1); }
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.35); }
+      100% { transform: scale(1); }
     }
 
     .b-checkbox svg {
@@ -464,26 +497,14 @@
       transition: color var(--transition);
     }
 
-    /* 7-day dots */
-    .dots-row {
-      display: flex;
-      gap: 4px;
-      align-items: center;
-    }
+    .dots-row { display: flex; gap: 4px; align-items: center; }
 
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .dot.filled  { background: var(--accent2); }
-    .dot.missed  { background: var(--surface2); border: 1px solid var(--border); }
-    .dot.na      { background: var(--surface2); opacity: 0.4; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot.filled    { background: var(--accent2); }
+    .dot.missed    { background: var(--surface2); border: 1px solid var(--border); }
+    .dot.na        { background: var(--surface2); opacity: 0.4; }
     .dot.today-dot { border: 1.5px solid var(--accent2); background: transparent; }
 
-    /* Delete button on behaviour */
     .b-delete {
       background: none;
       border: none;
@@ -551,16 +572,12 @@
       gap: 0.4rem;
     }
 
-    .section-header.overdue-hdr { color: var(--red); }
-    .section-header.today-hdr   { color: var(--amber); }
+    .section-header.overdue-hdr  { color: var(--red); }
+    .section-header.today-hdr    { color: var(--amber); }
     .section-header.upcoming-hdr { color: var(--green); }
-    .section-header.done-hdr    { color: var(--text-muted); }
+    .section-header.done-hdr     { color: var(--text-muted); }
 
-    .task-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.55rem;
-    }
+    .task-list { display: flex; flex-direction: column; gap: 0.55rem; }
 
     .task-item {
       background: var(--surface);
@@ -594,11 +611,7 @@
       transition: background var(--transition), border-color var(--transition), transform 0.15s ease;
     }
 
-    .t-checkbox.checked {
-      background: var(--green);
-      border-color: var(--green);
-    }
-
+    .t-checkbox.checked { background: var(--green); border-color: var(--green); }
     .t-checkbox.pop { animation: checkPop 0.3s ease; }
 
     .t-checkbox svg {
@@ -626,12 +639,7 @@
       text-overflow: ellipsis;
     }
 
-    .task-meta {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
+    .task-meta { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 
     .priority-pill {
       font-size: 0.65rem;
@@ -646,11 +654,7 @@
     .priority-pill.medium { background: var(--amber-soft);  color: var(--amber); }
     .priority-pill.low    { background: var(--green-soft);  color: var(--green); }
 
-    .task-due {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
+    .task-due { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
 
     .t-delete {
       background: none;
@@ -676,7 +680,7 @@
       bottom: 1.5rem;
       right: 50%;
       transform: translateX(50%);
-      width: calc(min(480px,100vw) - 2.5rem);
+      width: calc(min(480px, 100vw) - 2.5rem);
       max-width: 435px;
       padding: 0.85rem;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -710,10 +714,7 @@
       transition: opacity 0.25s ease;
     }
 
-    .modal-overlay.open {
-      opacity: 1;
-      pointer-events: all;
-    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
 
     .modal-sheet {
       background: var(--surface);
@@ -743,9 +744,7 @@
       letter-spacing: -0.01em;
     }
 
-    .form-group {
-      margin-bottom: 1rem;
-    }
+    .form-group { margin-bottom: 1rem; }
 
     .form-label {
       display: block;
@@ -776,11 +775,7 @@
 
     .form-input::placeholder { color: var(--text-muted); }
 
-    /* Priority selector */
-    .priority-selector {
-      display: flex;
-      gap: 0.5rem;
-    }
+    .priority-selector { display: flex; gap: 0.5rem; }
 
     .priority-option {
       flex: 1;
@@ -812,10 +807,18 @@
 </head>
 <body>
 
+<!-- Loading overlay -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+</div>
+
+<!-- Error toast -->
+<div id="toast"></div>
+
 <!-- ══════════════════════════════════════════════
      WELCOME SCREEN
 ══════════════════════════════════════════════ -->
-<div id="welcome-screen">
+<div id="welcome-screen" class="hidden">
   <div class="welcome-logo">&#9997;&#65039;</div>
   <h1 class="welcome-title">Trakr</h1>
   <p class="welcome-tagline">Track your habits. Tame your tasks.</p>
@@ -828,7 +831,6 @@
       placeholder="Your name…"
       maxlength="40"
       autocomplete="off"
-      autofocus
     />
     <button type="submit" class="btn-primary" id="welcome-btn" disabled>Let's Begin &rarr;</button>
   </form>
@@ -838,7 +840,6 @@
      MAIN APP
 ══════════════════════════════════════════════ -->
 <div id="app" class="hidden">
-  <!-- Header -->
   <header class="app-header">
     <div class="greeting" id="greeting">Good morning, friend</div>
     <nav class="tab-bar" role="tablist">
@@ -848,30 +849,23 @@
     </nav>
   </header>
 
-  <!-- ── DASHBOARD TAB ── -->
+  <!-- DASHBOARD -->
   <section id="tab-dashboard" class="tab-panel active" role="tabpanel">
-
-    <!-- Streak banner (hidden until streak >= 2) -->
     <div class="streak-banner hidden" id="streak-banner">
       <div class="streak-fire">&#128293;</div>
       <div class="streak-text"><span id="streak-num">0</span>-day behaviour streak! Keep it up.</div>
     </div>
-
-    <!-- Behaviour Progress Card -->
-    <div class="card" id="dash-behaviour-card">
+    <div class="card">
       <div class="card-label">Behaviour Progress</div>
       <div id="dash-behaviour-content"></div>
     </div>
-
-    <!-- Task Overview Card -->
-    <div class="card" id="dash-task-card">
+    <div class="card">
       <div class="card-label">Task Overview</div>
       <div id="dash-task-content"></div>
     </div>
-
   </section>
 
-  <!-- ── BEHAVIOURS TAB ── -->
+  <!-- BEHAVIOURS -->
   <section id="tab-behaviours" class="tab-panel hidden" role="tabpanel">
     <div class="tab-date" id="behaviour-date"></div>
     <div class="behaviour-list" id="behaviour-list"></div>
@@ -882,7 +876,7 @@
     <button class="fab" id="fab-behaviour">+ Add Behaviour</button>
   </section>
 
-  <!-- ── TASKS TAB ── -->
+  <!-- TASKS -->
   <section id="tab-tasks" class="tab-panel hidden" role="tabpanel">
     <div class="tasks-header">
       <div class="tab-date" id="task-date" style="margin-bottom:0"></div>
@@ -900,9 +894,7 @@
   </section>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     ADD BEHAVIOUR MODAL
-══════════════════════════════════════════════ -->
+<!-- ADD BEHAVIOUR MODAL -->
 <div class="modal-overlay" id="behaviour-modal" role="dialog" aria-modal="true" aria-label="Add Behaviour">
   <div class="modal-sheet">
     <div class="modal-drag"></div>
@@ -910,23 +902,15 @@
     <form id="behaviour-form" novalidate>
       <div class="form-group">
         <label class="form-label" for="b-name-input">Behaviour name</label>
-        <input
-          type="text"
-          id="b-name-input"
-          class="form-input"
-          placeholder="e.g. Morning walk"
-          maxlength="50"
-          autocomplete="off"
-        />
+        <input type="text" id="b-name-input" class="form-input"
+          placeholder="e.g. Morning walk" maxlength="50" autocomplete="off" />
       </div>
-      <button type="submit" class="btn-primary" style="width:100%" id="b-submit-btn">Add Behaviour</button>
+      <button type="submit" class="btn-primary" style="width:100%">Add Behaviour</button>
     </form>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     ADD TASK MODAL
-══════════════════════════════════════════════ -->
+<!-- ADD TASK MODAL -->
 <div class="modal-overlay" id="task-modal" role="dialog" aria-modal="true" aria-label="Add Task">
   <div class="modal-sheet">
     <div class="modal-drag"></div>
@@ -934,14 +918,8 @@
     <form id="task-form" novalidate>
       <div class="form-group">
         <label class="form-label" for="t-name-input">Task name</label>
-        <input
-          type="text"
-          id="t-name-input"
-          class="form-input"
-          placeholder="e.g. Submit project report"
-          maxlength="120"
-          autocomplete="off"
-        />
+        <input type="text" id="t-name-input" class="form-input"
+          placeholder="e.g. Submit project report" maxlength="120" autocomplete="off" />
       </div>
       <div class="form-group">
         <label class="form-label">Priority</label>
@@ -953,18 +931,14 @@
       </div>
       <div class="form-group">
         <label class="form-label" for="t-due-input">Due date</label>
-        <input
-          type="date"
-          id="t-due-input"
-          class="form-input"
-        />
+        <input type="date" id="t-due-input" class="form-input" />
       </div>
-      <button type="submit" class="btn-primary" style="width:100%" id="t-submit-btn">Add Task</button>
+      <button type="submit" class="btn-primary" style="width:100%">Add Task</button>
     </form>
   </div>
 </div>
 
-<!-- SVG defs for gradient ring -->
+<!-- SVG gradient definition for progress ring -->
 <svg width="0" height="0" style="position:absolute">
   <defs>
     <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -976,28 +950,20 @@
 
 <script>
 /* ═════════════════════════════════════════════
-   CONSTANTS & HELPERS
+   DATE HELPERS
 ═════════════════════════════════════════════ */
-const STORAGE_KEYS = {
-  USERNAME:   'trakr_username',
-  BEHAVIOURS: 'trakr_behaviours',
-  TASKS:      'trakr_tasks',
-};
-
 const todayStr = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 };
 
 const formatDate = (str) => {
-  // YYYY-MM-DD → readable
   const [y, m, d] = str.split('-').map(Number);
   return new Date(y, m-1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-const fullDateStr = () => {
-  return new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-};
+const fullDateStr = () =>
+  new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 
 const addDays = (str, n) => {
   const [y, m, d] = str.split('-').map(Number);
@@ -1006,57 +972,141 @@ const addDays = (str, n) => {
   return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
 };
 
-const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+const escHtml = (str) =>
+  str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
-function load(key, def) {
-  try { return JSON.parse(localStorage.getItem(key)) ?? def; }
-  catch { return def; }
-}
-function save(key, val) {
-  localStorage.setItem(key, JSON.stringify(val));
+/* ═════════════════════════════════════════════
+   API CLIENT
+   Only userId is stored in localStorage.
+   All data lives in Firestore via the REST API.
+═════════════════════════════════════════════ */
+async function apiFetch(path, { method = 'GET', body } = {}) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const res = await fetch(`/api${path}`, opts);
+  if (!res.ok) {
+    const payload = await res.json().catch(() => ({}));
+    throw new Error(payload.error || `HTTP ${res.status}`);
+  }
+  return res.json();
 }
 
 /* ═════════════════════════════════════════════
    STATE
 ═════════════════════════════════════════════ */
-let username   = load(STORAGE_KEYS.USERNAME, null);
-let behaviours = load(STORAGE_KEYS.BEHAVIOURS, []);
-let tasks      = load(STORAGE_KEYS.TASKS, []);
-let showCompleted = false;
+let userId   = localStorage.getItem('trakr_userId');
+let username = localStorage.getItem('trakr_username');
+let behaviours     = [];
+let tasks          = [];
+let showCompleted  = false;
 let selectedPriority = null;
-let activeTab  = 'dashboard';
+let activeTab      = 'dashboard';
 
 /* ═════════════════════════════════════════════
-   WELCOME SCREEN
+   LOADING & TOAST
 ═════════════════════════════════════════════ */
-const welcomeScreen  = document.getElementById('welcome-screen');
-const appEl          = document.getElementById('app');
-const usernameInput  = document.getElementById('username-input');
-const welcomeBtn     = document.getElementById('welcome-btn');
-const welcomeForm    = document.getElementById('welcome-form');
+const loadingOverlay = document.getElementById('loading-overlay');
 
-function initApp() {
-  welcomeScreen.classList.add('hidden');
-  appEl.classList.remove('hidden');
-  updateGreeting();
-  renderAll();
+function showLoading(on) {
+  if (on) {
+    loadingOverlay.classList.remove('hidden', 'fade-out');
+  } else {
+    loadingOverlay.classList.add('fade-out');
+    setTimeout(() => loadingOverlay.classList.add('hidden'), 320);
+  }
 }
 
-if (username) {
-  initApp();
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
 }
+
+/* ═════════════════════════════════════════════
+   BOOT
+═════════════════════════════════════════════ */
+const welcomeScreen = document.getElementById('welcome-screen');
+const appEl         = document.getElementById('app');
+
+async function loadData() {
+  [behaviours, tasks] = await Promise.all([
+    apiFetch(`/users/${userId}/behaviours`),
+    apiFetch(`/users/${userId}/tasks`),
+  ]);
+}
+
+async function bootApp() {
+  try {
+    await loadData();
+    welcomeScreen.classList.add('hidden');
+    appEl.classList.remove('hidden');
+    updateGreeting();
+    renderAll();
+    showLoading(false);
+  } catch (err) {
+    console.error('Boot failed', err);
+    showLoading(false);
+    // If user not found in DB, clear stale localStorage and show welcome
+    localStorage.removeItem('trakr_userId');
+    localStorage.removeItem('trakr_username');
+    userId = null;
+    username = null;
+    showWelcome();
+  }
+}
+
+function showWelcome() {
+  showLoading(false);
+  welcomeScreen.classList.remove('hidden');
+  appEl.classList.add('hidden');
+  document.getElementById('username-input').focus();
+}
+
+// If we have a stored userId, attempt to load directly
+if (userId && username) {
+  bootApp();
+} else {
+  showWelcome();
+}
+
+/* ═════════════════════════════════════════════
+   WELCOME FORM
+═════════════════════════════════════════════ */
+const usernameInput = document.getElementById('username-input');
+const welcomeBtn    = document.getElementById('welcome-btn');
+const welcomeForm   = document.getElementById('welcome-form');
 
 usernameInput.addEventListener('input', () => {
   welcomeBtn.disabled = usernameInput.value.trim().length === 0;
 });
 
-welcomeForm.addEventListener('submit', (e) => {
+welcomeForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = usernameInput.value.trim();
   if (!name) return;
-  username = name;
-  save(STORAGE_KEYS.USERNAME, username);
-  initApp();
+
+  welcomeBtn.disabled = true;
+  welcomeBtn.textContent = 'Setting up…';
+
+  try {
+    const user = await apiFetch('/users', { method: 'POST', body: { username: name } });
+    userId   = user.id;
+    username = user.username;
+    localStorage.setItem('trakr_userId',   userId);
+    localStorage.setItem('trakr_username', username);
+
+    showLoading(true);
+    await bootApp();
+  } catch (err) {
+    console.error(err);
+    showToast('Could not connect. Please try again.');
+    welcomeBtn.disabled = false;
+    welcomeBtn.textContent = "Let's Begin →";
+  }
 });
 
 /* ═════════════════════════════════════════════
@@ -1071,23 +1121,18 @@ function updateGreeting() {
 /* ═════════════════════════════════════════════
    TAB NAVIGATION
 ═════════════════════════════════════════════ */
-const tabBtns = document.querySelectorAll('.tab-btn');
-const tabPanels = document.querySelectorAll('.tab-panel');
-
-tabBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const tab = btn.dataset.tab;
-    switchTab(tab);
-  });
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
 
 function switchTab(tab) {
   activeTab = tab;
-  tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  tabPanels.forEach(p => {
-    const isActive = p.id === `tab-${tab}`;
-    p.classList.toggle('active', isActive);
-    p.classList.toggle('hidden', !isActive);
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    const active = p.id === `tab-${tab}`;
+    p.classList.toggle('active', active);
+    p.classList.toggle('hidden', !active);
   });
   renderAll();
 }
@@ -1103,20 +1148,13 @@ function renderAll() {
 
 /* ═════════════════════════════════════════════
    STREAK CALCULATION
-   Consecutive days (going back from yesterday)
-   where at least 1 behaviour was completed.
 ═════════════════════════════════════════════ */
 function calcStreak() {
-  if (behaviours.length === 0) return 0;
-  const today = todayStr();
+  if (!behaviours.length) return 0;
   let streak = 0;
-  let cursor = today;
-
-  // Include today in streak if any behaviour completed today
+  let cursor = todayStr();
   while (true) {
-    const anyDone = behaviours.some(b =>
-      (b.completedDates || []).includes(cursor)
-    );
+    const anyDone = behaviours.some(b => (b.completedDates || []).includes(cursor));
     if (!anyDone) break;
     streak++;
     cursor = addDays(cursor, -1);
@@ -1132,9 +1170,9 @@ function getTaskStats() {
   let overdue = 0, dueToday = 0, upcoming = 0;
   tasks.forEach(t => {
     if (t.completed) return;
-    if (t.dueDate < today) overdue++;
+    if      (t.dueDate < today)  overdue++;
     else if (t.dueDate === today) dueToday++;
-    else upcoming++;
+    else                          upcoming++;
   });
   return { overdue, dueToday, upcoming };
 }
@@ -1153,13 +1191,12 @@ function renderDashboard() {
     bannerEl.classList.add('hidden');
   }
 
-  // Behaviour progress
+  // Behaviour ring
   const today = todayStr();
   const total = behaviours.length;
   const done  = behaviours.filter(b => (b.completedDates || []).includes(today)).length;
   const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
-  const R     = 44;
-  const C     = 2 * Math.PI * R;
+  const R = 44, C = 2 * Math.PI * R;
   const offset = C - (pct / 100) * C;
 
   const bContent = document.getElementById('dash-behaviour-content');
@@ -1170,8 +1207,7 @@ function renderDashboard() {
         <span class="empty-link" id="dash-add-behaviour">Add your first behaviour &rarr;</span>
       </div>`;
     document.getElementById('dash-add-behaviour').addEventListener('click', () => {
-      switchTab('behaviours');
-      openBehaviourModal();
+      switchTab('behaviours'); openBehaviourModal();
     });
   } else {
     bContent.innerHTML = `
@@ -1195,11 +1231,9 @@ function renderDashboard() {
       </div>`;
   }
 
-  // Task overview
+  // Task counters
   const { overdue, dueToday, upcoming } = getTaskStats();
   const tContent = document.getElementById('dash-task-content');
-  const anyTasks = tasks.filter(t => !t.completed).length > 0;
-
   if (tasks.length === 0) {
     tContent.innerHTML = `
       <div class="empty-state">
@@ -1207,28 +1241,26 @@ function renderDashboard() {
         <span class="empty-link" id="dash-add-task">Add one &rarr;</span>
       </div>`;
     document.getElementById('dash-add-task').addEventListener('click', () => {
-      switchTab('tasks');
-      openTaskModal();
+      switchTab('tasks'); openTaskModal();
     });
   } else {
     tContent.innerHTML = `
       <div class="task-counters">
-        <div class="counter-pill overdue" data-goto="tasks">
+        <div class="counter-pill overdue" tabindex="0">
           <div class="counter-num">${overdue}</div>
           <div class="counter-label">Overdue</div>
         </div>
-        <div class="counter-pill today" data-goto="tasks">
+        <div class="counter-pill today" tabindex="0">
           <div class="counter-num">${dueToday}</div>
           <div class="counter-label">Due Today</div>
         </div>
-        <div class="counter-pill upcoming" data-goto="tasks">
+        <div class="counter-pill upcoming" tabindex="0">
           <div class="counter-num">${upcoming}</div>
           <div class="counter-label">Upcoming</div>
         </div>
       </div>`;
-    tContent.querySelectorAll('.counter-pill').forEach(pill => {
-      pill.addEventListener('click', () => switchTab('tasks'));
-    });
+    tContent.querySelectorAll('.counter-pill').forEach(pill =>
+      pill.addEventListener('click', () => switchTab('tasks')));
   }
 }
 
@@ -1239,10 +1271,10 @@ function renderBehaviours() {
   document.getElementById('behaviour-date').textContent = fullDateStr();
 
   const today = todayStr();
-  const listEl = document.getElementById('behaviour-list');
+  const listEl  = document.getElementById('behaviour-list');
   const emptyEl = document.getElementById('behaviour-empty');
 
-  if (behaviours.length === 0) {
+  if (!behaviours.length) {
     listEl.innerHTML = '';
     listEl.classList.add('hidden');
     emptyEl.classList.remove('hidden');
@@ -1252,7 +1284,6 @@ function renderBehaviours() {
   listEl.classList.remove('hidden');
   emptyEl.classList.add('hidden');
 
-  // Sort: incomplete first, completed last
   const sorted = [...behaviours].sort((a, b) => {
     const aDone = (a.completedDates || []).includes(today);
     const bDone = (b.completedDates || []).includes(today);
@@ -1262,17 +1293,16 @@ function renderBehaviours() {
 
   listEl.innerHTML = sorted.map(b => {
     const isDone = (b.completedDates || []).includes(today);
-    const dots   = buildDots(b, today);
     return `
       <div class="behaviour-item ${isDone ? 'completed' : ''}" data-id="${b.id}">
-        <button class="b-checkbox ${isDone ? 'checked' : ''}" data-id="${b.id}" aria-label="Toggle ${b.name}">
+        <button class="b-checkbox ${isDone ? 'checked' : ''}" data-id="${b.id}" aria-label="Toggle ${escHtml(b.name)}">
           <svg viewBox="0 0 12 9"><polyline points="1,4 4.5,8 11,1"/></svg>
         </button>
         <div class="b-info">
           <div class="b-name">${escHtml(b.name)}</div>
-          <div class="dots-row">${dots}</div>
+          <div class="dots-row">${buildDots(b, today)}</div>
         </div>
-        <button class="b-delete" data-id="${b.id}" aria-label="Delete ${b.name}">
+        <button class="b-delete" data-id="${b.id}" aria-label="Delete ${escHtml(b.name)}">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
             <line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/>
           </svg>
@@ -1280,13 +1310,10 @@ function renderBehaviours() {
       </div>`;
   }).join('');
 
-  // Events
-  listEl.querySelectorAll('.b-checkbox').forEach(cb => {
-    cb.addEventListener('click', () => toggleBehaviour(cb.dataset.id));
-  });
-  listEl.querySelectorAll('.b-delete').forEach(btn => {
-    btn.addEventListener('click', () => deleteBehaviour(btn.dataset.id));
-  });
+  listEl.querySelectorAll('.b-checkbox').forEach(cb =>
+    cb.addEventListener('click', () => toggleBehaviour(cb.dataset.id)));
+  listEl.querySelectorAll('.b-delete').forEach(btn =>
+    btn.addEventListener('click', () => deleteBehaviour(btn.dataset.id)));
 }
 
 function buildDots(behaviour, today) {
@@ -1295,7 +1322,6 @@ function buildDots(behaviour, today) {
     const day = addDays(today, -i);
     const isToday = day === today;
     const afterCreation = day >= behaviour.createdDate;
-
     if (!afterCreation) {
       html += `<span class="dot na" title="N/A"></span>`;
     } else if (isToday) {
@@ -1312,20 +1338,21 @@ function buildDots(behaviour, today) {
 /* ═════════════════════════════════════════════
    RENDER: TASKS
 ═════════════════════════════════════════════ */
+const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
+const priorityOrder = (t) => PRIORITY_ORDER[t.priority] ?? 3;
+
 function renderTasks() {
   document.getElementById('task-date').textContent = fullDateStr();
 
-  // Show/hide completed toggle label
   const completedCount = tasks.filter(t => t.completed).length;
   document.getElementById('show-completed-label').textContent =
     `${showCompleted ? 'Hide' : 'Show'} completed (${completedCount})`;
   document.getElementById('show-completed-btn').classList.toggle('active', showCompleted);
 
-  const today = todayStr();
+  const today     = todayStr();
   const container = document.getElementById('task-list-container');
   const emptyEl   = document.getElementById('task-empty');
-
-  const active = tasks.filter(t => !t.completed);
+  const active    = tasks.filter(t => !t.completed);
 
   const overdue  = active.filter(t => t.dueDate < today)
     .sort((a,b) => priorityOrder(a) - priorityOrder(b) || a.dueDate.localeCompare(b.dueDate));
@@ -1335,49 +1362,30 @@ function renderTasks() {
     .sort((a,b) => priorityOrder(a) - priorityOrder(b) || a.dueDate.localeCompare(b.dueDate));
   const completed = tasks.filter(t => t.completed);
 
-  if (tasks.length === 0) {
+  if (!tasks.length) {
     container.innerHTML = '';
     emptyEl.classList.remove('hidden');
     return;
   }
-
   emptyEl.classList.add('hidden');
 
   let html = '';
+  if (overdue.length)  html += `<div class="section-header overdue-hdr">🔴 Overdue</div><div class="task-list">${overdue.map(t => taskCard(t,'overdue')).join('')}</div>`;
+  if (dueToday.length) html += `<div class="section-header today-hdr">📅 Due Today</div><div class="task-list">${dueToday.map(t => taskCard(t,'today')).join('')}</div>`;
+  if (upcoming.length) html += `<div class="section-header upcoming-hdr">📆 Upcoming</div><div class="task-list">${upcoming.map(t => taskCard(t,'upcoming')).join('')}</div>`;
 
-  if (overdue.length > 0) {
-    html += `<div class="section-header overdue-hdr">🔴 Overdue</div>`;
-    html += `<div class="task-list">${overdue.map(t => taskCard(t, 'overdue')).join('')}</div>`;
-  }
-
-  if (dueToday.length > 0) {
-    html += `<div class="section-header today-hdr">📅 Due Today</div>`;
-    html += `<div class="task-list">${dueToday.map(t => taskCard(t, 'today')).join('')}</div>`;
-  }
-
-  if (upcoming.length > 0) {
-    html += `<div class="section-header upcoming-hdr">📆 Upcoming</div>`;
-    html += `<div class="task-list">${upcoming.map(t => taskCard(t, 'upcoming')).join('')}</div>`;
-  }
-
-  if (overdue.length === 0 && dueToday.length === 0 && upcoming.length === 0 && completed.length > 0) {
+  if (!overdue.length && !dueToday.length && !upcoming.length && completed.length)
     html += `<div class="empty-state"><p>All tasks are done!</p></div>`;
-  }
 
-  if (showCompleted && completed.length > 0) {
-    html += `<div class="section-header done-hdr">Completed</div>`;
-    html += `<div class="task-list">${completed.map(t => taskCard(t, 'done')).join('')}</div>`;
-  }
+  if (showCompleted && completed.length)
+    html += `<div class="section-header done-hdr">Completed</div><div class="task-list">${completed.map(t => taskCard(t,'done')).join('')}</div>`;
 
   container.innerHTML = html;
 
-  // Events
-  container.querySelectorAll('.t-checkbox').forEach(cb => {
-    cb.addEventListener('click', () => toggleTask(cb.dataset.id));
-  });
-  container.querySelectorAll('.t-delete').forEach(btn => {
-    btn.addEventListener('click', () => deleteTask(btn.dataset.id));
-  });
+  container.querySelectorAll('.t-checkbox').forEach(cb =>
+    cb.addEventListener('click', () => toggleTask(cb.dataset.id)));
+  container.querySelectorAll('.t-delete').forEach(btn =>
+    btn.addEventListener('click', () => deleteTask(btn.dataset.id)));
 }
 
 function taskCard(task, section) {
@@ -1402,87 +1410,117 @@ function taskCard(task, section) {
     </div>`;
 }
 
-const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
-function priorityOrder(t) { return PRIORITY_ORDER[t.priority] ?? 3; }
-
 /* ═════════════════════════════════════════════
-   BEHAVIOUR CRUD
+   BEHAVIOUR CRUD  (optimistic updates for toggles)
 ═════════════════════════════════════════════ */
-function toggleBehaviour(id) {
+async function toggleBehaviour(id) {
   const today = todayStr();
-  behaviours = behaviours.map(b => {
-    if (b.id !== id) return b;
-    const dates = b.completedDates || [];
-    const idx = dates.indexOf(today);
-    const newDates = idx >= 0
-      ? dates.filter(d => d !== today)
-      : [...dates, today];
-    return { ...b, completedDates: newDates };
-  });
-  save(STORAGE_KEYS.BEHAVIOURS, behaviours);
-  // Animate the checkbox
-  const cb = document.querySelector(`.b-checkbox[data-id="${id}"]`);
-  if (cb) {
-    cb.classList.add('pop');
-    cb.addEventListener('animationend', () => cb.classList.remove('pop'), { once: true });
+  const b = behaviours.find(x => x.id === id);
+  if (!b) return;
+
+  const prev = b.completedDates || [];
+  const next = prev.includes(today) ? prev.filter(d => d !== today) : [...prev, today];
+
+  // Optimistic update
+  behaviours = behaviours.map(x => x.id === id ? { ...x, completedDates: next } : x);
+  animateCheckbox(`.b-checkbox[data-id="${id}"]`);
+  renderAll();
+
+  try {
+    await apiFetch(`/users/${userId}/behaviours/${id}`, { method: 'PATCH', body: { completedDates: next } });
+  } catch (err) {
+    // Revert
+    behaviours = behaviours.map(x => x.id === id ? { ...x, completedDates: prev } : x);
+    renderAll();
+    showToast('Failed to save. Please try again.');
   }
-  renderAll();
 }
 
-function deleteBehaviour(id) {
+async function deleteBehaviour(id) {
+  const backup = behaviours.find(b => b.id === id);
   behaviours = behaviours.filter(b => b.id !== id);
-  save(STORAGE_KEYS.BEHAVIOURS, behaviours);
   renderAll();
+
+  try {
+    await apiFetch(`/users/${userId}/behaviours/${id}`, { method: 'DELETE' });
+  } catch (err) {
+    if (backup) behaviours.push(backup);
+    renderAll();
+    showToast('Failed to delete. Please try again.');
+  }
 }
 
-function addBehaviour(name) {
-  const b = {
-    id: uid(),
-    name: name.trim(),
-    createdDate: todayStr(),
-    completedDates: [],
-  };
-  behaviours.push(b);
-  save(STORAGE_KEYS.BEHAVIOURS, behaviours);
-  renderAll();
+async function addBehaviour(name) {
+  try {
+    const b = await apiFetch(`/users/${userId}/behaviours`, {
+      method: 'POST',
+      body: { name, createdDate: todayStr() },
+    });
+    behaviours.push(b);
+    renderAll();
+  } catch (err) {
+    showToast('Failed to add behaviour. Please try again.');
+  }
 }
 
 /* ═════════════════════════════════════════════
-   TASK CRUD
+   TASK CRUD  (optimistic for toggle)
 ═════════════════════════════════════════════ */
-function toggleTask(id) {
-  tasks = tasks.map(t => {
-    if (t.id !== id) return t;
-    return { ...t, completed: !t.completed };
-  });
-  save(STORAGE_KEYS.TASKS, tasks);
-  // Animate
-  const cb = document.querySelector(`.t-checkbox[data-id="${id}"]`);
-  if (cb) {
-    cb.classList.add('pop');
-    cb.addEventListener('animationend', () => cb.classList.remove('pop'), { once: true });
+async function toggleTask(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+
+  const prevCompleted = t.completed;
+  const nextCompleted = !prevCompleted;
+
+  tasks = tasks.map(x => x.id === id ? { ...x, completed: nextCompleted } : x);
+  animateCheckbox(`.t-checkbox[data-id="${id}"]`);
+  renderAll();
+
+  try {
+    await apiFetch(`/users/${userId}/tasks/${id}`, { method: 'PATCH', body: { completed: nextCompleted } });
+  } catch (err) {
+    tasks = tasks.map(x => x.id === id ? { ...x, completed: prevCompleted } : x);
+    renderAll();
+    showToast('Failed to save. Please try again.');
   }
-  renderAll();
 }
 
-function deleteTask(id) {
+async function deleteTask(id) {
+  const backup = tasks.find(t => t.id === id);
   tasks = tasks.filter(t => t.id !== id);
-  save(STORAGE_KEYS.TASKS, tasks);
   renderAll();
+
+  try {
+    await apiFetch(`/users/${userId}/tasks/${id}`, { method: 'DELETE' });
+  } catch (err) {
+    if (backup) tasks.push(backup);
+    renderAll();
+    showToast('Failed to delete. Please try again.');
+  }
 }
 
-function addTask(name, priority, dueDate) {
-  const t = {
-    id: uid(),
-    name: name.trim(),
-    priority,
-    dueDate,
-    completed: false,
-    createdDate: todayStr(),
-  };
-  tasks.push(t);
-  save(STORAGE_KEYS.TASKS, tasks);
-  renderAll();
+async function addTask(name, priority, dueDate) {
+  try {
+    const t = await apiFetch(`/users/${userId}/tasks`, {
+      method: 'POST',
+      body: { name, priority, dueDate },
+    });
+    tasks.push(t);
+    renderAll();
+  } catch (err) {
+    showToast('Failed to add task. Please try again.');
+  }
+}
+
+/* ═════════════════════════════════════════════
+   CHECKBOX ANIMATION HELPER
+═════════════════════════════════════════════ */
+function animateCheckbox(selector) {
+  const el = document.querySelector(selector);
+  if (!el) return;
+  el.classList.add('pop');
+  el.addEventListener('animationend', () => el.classList.remove('pop'), { once: true });
 }
 
 /* ═════════════════════════════════════════════
@@ -1491,15 +1529,8 @@ function addTask(name, priority, dueDate) {
 function openModal(id) {
   const el = document.getElementById(id);
   el.classList.add('open');
-  // Focus first input
-  setTimeout(() => {
-    const inp = el.querySelector('input');
-    if (inp) inp.focus();
-  }, 100);
-  // Close on overlay click
-  el.addEventListener('click', (e) => {
-    if (e.target === el) closeModal(id);
-  }, { once: true });
+  setTimeout(() => { const inp = el.querySelector('input'); if (inp) inp.focus(); }, 100);
+  el.addEventListener('click', e => { if (e.target === el) closeModal(id); }, { once: true });
 }
 
 function closeModal(id) {
@@ -1507,9 +1538,7 @@ function closeModal(id) {
 }
 
 // Behaviour modal
-const behaviourModal = document.getElementById('behaviour-modal');
-const behaviourForm  = document.getElementById('behaviour-form');
-const bNameInput     = document.getElementById('b-name-input');
+const bNameInput = document.getElementById('b-name-input');
 
 function openBehaviourModal() {
   bNameInput.value = '';
@@ -1519,28 +1548,24 @@ function openBehaviourModal() {
 document.getElementById('fab-behaviour').addEventListener('click', openBehaviourModal);
 document.getElementById('add-behaviour-empty-link').addEventListener('click', openBehaviourModal);
 
-behaviourForm.addEventListener('submit', (e) => {
+document.getElementById('behaviour-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = bNameInput.value.trim();
   if (!name) return;
-  addBehaviour(name);
   closeModal('behaviour-modal');
+  await addBehaviour(name);
 });
 
 // Task modal
-const taskModal   = document.getElementById('task-modal');
-const taskForm    = document.getElementById('task-form');
-const tNameInput  = document.getElementById('t-name-input');
-const tDueInput   = document.getElementById('t-due-input');
-const prioSel     = document.getElementById('priority-selector');
+const tNameInput = document.getElementById('t-name-input');
+const tDueInput  = document.getElementById('t-due-input');
+const prioSel    = document.getElementById('priority-selector');
 
 function openTaskModal() {
-  tNameInput.value = '';
-  tDueInput.value  = todayStr();
-  selectedPriority = null;
-  prioSel.querySelectorAll('.priority-option').forEach(o => {
-    o.className = 'priority-option';
-  });
+  tNameInput.value    = '';
+  tDueInput.value     = todayStr();
+  selectedPriority    = null;
+  prioSel.querySelectorAll('.priority-option').forEach(o => { o.className = 'priority-option'; });
   openModal('task-modal');
 }
 
@@ -1550,39 +1575,25 @@ document.getElementById('add-task-empty-link').addEventListener('click', openTas
 prioSel.querySelectorAll('.priority-option').forEach(opt => {
   opt.addEventListener('click', () => {
     selectedPriority = opt.dataset.value;
-    prioSel.querySelectorAll('.priority-option').forEach(o => {
-      o.className = 'priority-option';
-    });
+    prioSel.querySelectorAll('.priority-option').forEach(o => { o.className = 'priority-option'; });
     opt.classList.add(`selected-${selectedPriority}`);
   });
 });
 
-taskForm.addEventListener('submit', (e) => {
+document.getElementById('task-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = tNameInput.value.trim();
   const due  = tDueInput.value;
   if (!name || !selectedPriority || !due) return;
-  addTask(name, selectedPriority, due);
   closeModal('task-modal');
+  await addTask(name, selectedPriority, due);
 });
 
-// Show completed toggle
+// Show/hide completed toggle
 document.getElementById('show-completed-btn').addEventListener('click', () => {
   showCompleted = !showCompleted;
   renderTasks();
 });
-
-/* ═════════════════════════════════════════════
-   SECURITY: Escape HTML
-═════════════════════════════════════════════ */
-function escHtml(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 </script>
 </body>
 </html>
