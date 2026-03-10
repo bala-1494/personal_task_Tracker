@@ -947,6 +947,258 @@
     }
 
     .logout-btn:hover { color: var(--red); background: var(--red-soft); }
+
+    /* ─────────────────────────────────────────────
+       BEHAVIOUR VIEW SWITCHER
+    ───────────────────────────────────────────── */
+    .behaviour-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .behaviour-header .tab-date { margin-bottom: 0; }
+
+    .bview-tabs {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .bview-tab {
+      padding: 0.28rem 0.6rem;
+      background: none;
+      border: none;
+      border-radius: 5px;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      letter-spacing: 0.01em;
+    }
+
+    .bview-tab.active { background: var(--surface2); color: var(--text); }
+
+    /* Period navigation (prev/next week or month) */
+    .period-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.45rem 0.75rem;
+      margin-bottom: 1rem;
+      font-size: 0.83rem;
+      font-weight: 600;
+    }
+
+    .period-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 2px 8px;
+      border-radius: 4px;
+      transition: color var(--transition), background var(--transition);
+    }
+
+    .period-btn:hover { color: var(--text); background: var(--surface2); }
+    .period-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* Trend indicators */
+    .trend {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 1px 4px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      line-height: 1.4;
+    }
+
+    .trend-up   { color: var(--green); background: var(--green-soft); }
+    .trend-down { color: var(--red);   background: var(--red-soft); }
+    .trend-flat { color: var(--text-muted); background: var(--surface2); }
+
+    /* ─────────────────────────────────────────────
+       WEEKLY GRID VIEW
+    ───────────────────────────────────────────── */
+    .week-summary {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 0.85rem;
+    }
+
+    .week-summary strong { color: var(--text); font-size: 1.05rem; }
+
+    .week-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+    .week-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.73rem;
+    }
+
+    .week-table th, .week-table td {
+      padding: 0.38rem 0.22rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .week-table .b-col { text-align: left; min-width: 80px; max-width: 100px; }
+    .week-table .pct-col { min-width: 38px; }
+
+    .week-table th {
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .week-table th.today-col { color: var(--accent2); }
+
+    .week-table td.b-name-cell {
+      font-size: 0.76rem;
+      font-weight: 600;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100px;
+      color: var(--text);
+    }
+
+    .wc-done   { color: var(--accent2); font-size: 0.82rem; }
+    .wc-missed { color: var(--border);  font-size: 0.72rem; }
+    .wc-na     { color: var(--surface2); font-size: 0.6rem; opacity: 0.6; }
+
+    .week-table td.pct-cell { font-weight: 700; color: var(--accent2); }
+
+    .week-table tfoot td {
+      color: var(--text-muted);
+      font-size: 0.66rem;
+      font-weight: 700;
+      border-bottom: none;
+      border-top: 1.5px solid var(--border);
+      padding-top: 0.5rem;
+    }
+
+    .week-table tfoot td.dpct { color: var(--text); }
+
+    /* ─────────────────────────────────────────────
+       MONTHLY VIEW
+    ───────────────────────────────────────────── */
+    .monthly-summary {
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .monthly-pct-big {
+      font-size: 2.4rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 0.2rem;
+    }
+
+    .monthly-pct-label { font-size: 0.73rem; color: var(--text-muted); font-weight: 600; }
+
+    .monthly-behaviour-list { display: flex; flex-direction: column; gap: 0.65rem; }
+
+    .monthly-b-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.8rem 0.9rem;
+    }
+
+    .monthly-b-header {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .monthly-b-name {
+      flex: 1;
+      font-size: 0.83rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .monthly-b-pct { font-size: 0.78rem; font-weight: 700; color: var(--accent2); flex-shrink: 0; }
+
+    .monthly-progress-bar {
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 0.55rem;
+    }
+
+    .monthly-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .monthly-dot-row { display: flex; flex-wrap: wrap; gap: 3px; }
+
+    .mdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .mdot-done   { background: var(--accent2); }
+    .mdot-missed { background: var(--surface2); border: 1px solid var(--border); }
+    .mdot-na     { background: var(--surface2); opacity: 0.25; }
+
+    /* ─────────────────────────────────────────────
+       TASK PRIORITY FILTER
+    ───────────────────────────────────────────── */
+    .priority-filter {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .pf-btn {
+      padding: 0.28rem 0.65rem;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .pf-btn:hover { background: var(--surface2); }
+    .pf-btn.active                    { color: var(--text);  border-color: var(--text-muted); background: var(--surface2); }
+    .pf-btn[data-priority="all"].active    { border-color: var(--accent2); color: var(--accent2); background: var(--accent-soft); }
+    .pf-btn[data-priority="high"].active   { background: var(--red-soft);   color: var(--red);   border-color: var(--red); }
+    .pf-btn[data-priority="medium"].active { background: var(--amber-soft); color: var(--amber); border-color: var(--amber); }
+    .pf-btn[data-priority="low"].active    { background: var(--green-soft); color: var(--green); border-color: var(--green); }
   </style>
 </head>
 <body>
@@ -1095,8 +1347,20 @@
 
   <!-- BEHAVIOURS -->
   <section id="tab-behaviours" class="tab-panel hidden" role="tabpanel">
-    <div class="tab-date" id="behaviour-date"></div>
-    <div class="behaviour-list" id="behaviour-list"></div>
+    <div class="behaviour-header">
+      <div class="tab-date" id="behaviour-date"></div>
+      <div class="bview-tabs">
+        <button class="bview-tab active" data-view="daily">Daily</button>
+        <button class="bview-tab" data-view="weekly">Weekly</button>
+        <button class="bview-tab" data-view="monthly">Monthly</button>
+      </div>
+    </div>
+    <div class="period-nav hidden" id="period-nav">
+      <button class="period-btn" id="period-prev">&#8249;</button>
+      <span id="period-label"></span>
+      <button class="period-btn" id="period-next">&#8250;</button>
+    </div>
+    <div id="behaviour-view-container"></div>
     <div class="empty-state hidden" id="behaviour-empty">
       <p>No behaviours yet.</p>
       <span class="empty-link" id="add-behaviour-empty-link">+ Add your first behaviour</span>
@@ -1112,6 +1376,12 @@
         <span class="toggle-dot"></span>
         <span id="show-completed-label">Show completed</span>
       </button>
+    </div>
+    <div class="priority-filter">
+      <button class="pf-btn active" data-priority="all">All</button>
+      <button class="pf-btn" data-priority="high">&#128308; High</button>
+      <button class="pf-btn" data-priority="medium">&#128993; Medium</button>
+      <button class="pf-btn" data-priority="low">&#128994; Low</button>
     </div>
     <div id="task-list-container"></div>
     <div class="empty-state hidden" id="task-empty">
@@ -1236,6 +1506,14 @@ let activeTab        = 'dashboard';
 
 // Tracks the username entered during step-1 of sign-in (before PIN)
 let pendingSignInUsername = '';
+
+// Behaviour view state
+let behaviourView = 'daily';   // 'daily' | 'weekly' | 'monthly'
+let weekOffset    = 0;          // 0 = current week, -1 = previous, etc.
+let monthOffset   = 0;          // 0 = current month
+
+// Task priority filter
+let taskPriorityFilter = 'all'; // 'all' | 'high' | 'medium' | 'low'
 
 /* ═════════════════════════════════════════════
    LOADING & TOAST
@@ -1865,25 +2143,65 @@ function renderDashboard() {
 }
 
 /* ═════════════════════════════════════════════
-   RENDER: BEHAVIOURS
+   RENDER: BEHAVIOURS  (dispatches to sub-renderers)
 ═════════════════════════════════════════════ */
 function renderBehaviours() {
+  const today     = todayStr();
+  const container = document.getElementById('behaviour-view-container');
+  const emptyEl   = document.getElementById('behaviour-empty');
+  const periodNav = document.getElementById('period-nav');
+
   document.getElementById('behaviour-date').textContent = fullDateStr();
 
-  const today = todayStr();
-  const listEl  = document.getElementById('behaviour-list');
-  const emptyEl = document.getElementById('behaviour-empty');
-
   if (!behaviours.length) {
-    listEl.innerHTML = '';
-    listEl.classList.add('hidden');
+    container.innerHTML = '';
     emptyEl.classList.remove('hidden');
+    periodNav.classList.add('hidden');
     return;
   }
 
-  listEl.classList.remove('hidden');
   emptyEl.classList.add('hidden');
 
+  if (behaviourView === 'daily') {
+    periodNav.classList.add('hidden');
+    renderBehavioursDaily(container, today);
+  } else if (behaviourView === 'weekly') {
+    periodNav.classList.remove('hidden');
+    renderBehavioursWeekly(container, today);
+  } else {
+    periodNav.classList.remove('hidden');
+    renderBehavioursMonthly(container, today);
+  }
+}
+
+/* ─── Trend: compare last 7 days vs previous 7 days ── */
+function calcTrend(behaviour, today) {
+  const cd = behaviour.completedDates || [];
+  let rDone = 0, rTotal = 0, pDone = 0, pTotal = 0;
+  for (let i = 1; i <= 7; i++) {
+    const day = addDays(today, -i);
+    if (day >= behaviour.createdDate) { rTotal++; if (cd.includes(day)) rDone++; }
+  }
+  for (let i = 8; i <= 14; i++) {
+    const day = addDays(today, -i);
+    if (day >= behaviour.createdDate) { pTotal++; if (cd.includes(day)) pDone++; }
+  }
+  if (rTotal === 0) return 'flat';
+  const rRate = rDone / rTotal;
+  const pRate = pTotal > 0 ? pDone / pTotal : rRate;
+  if (rRate >= pRate + 0.15) return 'up';
+  if (rRate <= pRate - 0.15) return 'down';
+  return 'flat';
+}
+
+function trendBadge(trend) {
+  if (trend === 'up')   return '<span class="trend trend-up" title="Trending up">↑</span>';
+  if (trend === 'down') return '<span class="trend trend-down" title="Trending down">↓</span>';
+  return '<span class="trend trend-flat" title="Stable">→</span>';
+}
+
+/* ─── Daily view ─────────────────────────────── */
+function renderBehavioursDaily(container, today) {
   const sorted = [...behaviours].sort((a, b) => {
     const aDone = (a.completedDates || []).includes(today);
     const bDone = (b.completedDates || []).includes(today);
@@ -1891,15 +2209,19 @@ function renderBehaviours() {
     return aDone ? 1 : -1;
   });
 
-  listEl.innerHTML = sorted.map(b => {
-    const isDone = (b.completedDates || []).includes(today);
-    return `
+  container.innerHTML = `<div class="behaviour-list" id="behaviour-list">
+    ${sorted.map(b => {
+      const isDone = (b.completedDates || []).includes(today);
+      return `
       <div class="behaviour-item ${isDone ? 'completed' : ''}" data-id="${b.id}">
         <button class="b-checkbox ${isDone ? 'checked' : ''}" data-id="${b.id}" aria-label="Toggle ${escHtml(b.name)}">
           <svg viewBox="0 0 12 9"><polyline points="1,4 4.5,8 11,1"/></svg>
         </button>
         <div class="b-info">
-          <div class="b-name">${escHtml(b.name)}</div>
+          <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.35rem;">
+            <span class="b-name" style="margin-bottom:0;flex:1">${escHtml(b.name)}</span>
+            ${trendBadge(calcTrend(b, today))}
+          </div>
           <div class="dots-row">${buildDots(b, today)}</div>
         </div>
         <button class="b-delete" data-id="${b.id}" aria-label="Delete ${escHtml(b.name)}">
@@ -1908,11 +2230,12 @@ function renderBehaviours() {
           </svg>
         </button>
       </div>`;
-  }).join('');
+    }).join('')}
+  </div>`;
 
-  listEl.querySelectorAll('.b-checkbox').forEach(cb =>
+  container.querySelectorAll('.b-checkbox').forEach(cb =>
     cb.addEventListener('click', () => toggleBehaviour(cb.dataset.id)));
-  listEl.querySelectorAll('.b-delete').forEach(btn =>
+  container.querySelectorAll('.b-delete').forEach(btn =>
     btn.addEventListener('click', () => deleteBehaviour(btn.dataset.id)));
 }
 
@@ -1935,6 +2258,168 @@ function buildDots(behaviour, today) {
   return html;
 }
 
+/* ─── Weekly view ─────────────────────────────── */
+function dateObjToStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getWeekDays(offset) {
+  const now = new Date();
+  const dow = now.getDay();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1) + offset * 7);
+  monday.setHours(0, 0, 0, 0);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return dateObjToStr(d);
+  });
+}
+
+function renderBehavioursWeekly(container, today) {
+  const days     = getWeekDays(weekOffset);
+  const dayAbbr  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  // Period label
+  const fmtShort = (str) => {
+    const [y, m, d] = str.split('-').map(Number);
+    return new Date(y, m-1, d).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  };
+  document.getElementById('period-label').textContent =
+    `${fmtShort(days[0])} – ${fmtShort(days[6])}`;
+  document.getElementById('period-next').disabled = weekOffset >= 0;
+
+  // Compute totals
+  let totalDone = 0, totalPossible = 0;
+  const dayPcts = days.map(day => {
+    const eligible = behaviours.filter(b => day >= b.createdDate && day <= today);
+    if (!eligible.length) return null;
+    const done = eligible.filter(b => (b.completedDates || []).includes(day)).length;
+    totalDone      += done;
+    totalPossible  += eligible.length;
+    return Math.round((done / eligible.length) * 100);
+  });
+  const weekPct = totalPossible > 0 ? Math.round((totalDone / totalPossible) * 100) : 0;
+
+  // Header row
+  const headCells = days.map((day, i) => {
+    const [,, d] = day.split('-').map(Number);
+    return `<th class="day-col${day === today ? ' today-col' : ''}">${dayAbbr[i]}<br><span style="font-weight:500;opacity:0.7">${d}</span></th>`;
+  }).join('');
+
+  // Body rows
+  const bodyRows = behaviours.map(b => {
+    let bDone = 0, bPoss = 0;
+    const cells = days.map(day => {
+      if (day > today)              return `<td><span class="wc-na">·</span></td>`;
+      if (day < b.createdDate)      return `<td><span class="wc-na">·</span></td>`;
+      bPoss++;
+      const done = (b.completedDates || []).includes(day);
+      if (done) bDone++;
+      return `<td><span class="${done ? 'wc-done' : 'wc-missed'}">${done ? '✓' : '○'}</span></td>`;
+    }).join('');
+    const pct = bPoss > 0 ? Math.round((bDone / bPoss) * 100) : null;
+    return `<tr>
+      <td class="b-name-cell" title="${escHtml(b.name)}">${escHtml(b.name)}</td>
+      ${cells}
+      <td class="pct-cell">${pct !== null ? pct + '%' : '–'}</td>
+    </tr>`;
+  }).join('');
+
+  // Footer row
+  const footCells = dayPcts.map(pct =>
+    `<td class="${pct !== null ? 'dpct' : ''}">${pct !== null ? pct + '%' : '–'}</td>`
+  ).join('');
+
+  container.innerHTML = `
+    <div class="week-summary">Week completion: <strong>${weekPct}%</strong></div>
+    <div class="week-table-wrap">
+      <table class="week-table">
+        <thead>
+          <tr>
+            <th class="b-col">Habit</th>
+            ${headCells}
+            <th class="pct-col">Week</th>
+          </tr>
+        </thead>
+        <tbody>${bodyRows}</tbody>
+        <tfoot>
+          <tr>
+            <td class="b-col">Day %</td>
+            ${footCells}
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>`;
+}
+
+/* ─── Monthly view ─────────────────────────────── */
+function getMonthInfo(offset) {
+  const now   = new Date();
+  const first = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+  const last  = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0);
+  const y = first.getFullYear(), m = first.getMonth();
+  return {
+    label: first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
+    days: Array.from({ length: last.getDate() }, (_, i) =>
+      `${y}-${String(m+1).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`
+    ),
+  };
+}
+
+function renderBehavioursMonthly(container, today) {
+  const { label, days } = getMonthInfo(monthOffset);
+  document.getElementById('period-label').textContent = label;
+  document.getElementById('period-next').disabled = monthOffset >= 0;
+
+  // Overall month %
+  let totalDone = 0, totalPossible = 0;
+  behaviours.forEach(b => {
+    days.forEach(day => {
+      if (day > today || day < b.createdDate) return;
+      totalPossible++;
+      if ((b.completedDates || []).includes(day)) totalDone++;
+    });
+  });
+  const overallPct = totalPossible > 0 ? Math.round((totalDone / totalPossible) * 100) : 0;
+
+  // Per-behaviour cards
+  const bCards = behaviours.map(b => {
+    let done = 0, possible = 0;
+    const dots = days.map(day => {
+      const isFuture = day > today;
+      const beforeCreation = day < b.createdDate;
+      if (beforeCreation || isFuture)
+        return `<span class="mdot mdot-na" title="${day}"></span>`;
+      possible++;
+      const isDone = (b.completedDates || []).includes(day);
+      if (isDone) done++;
+      return `<span class="mdot ${isDone ? 'mdot-done' : 'mdot-missed'}" title="${day}"></span>`;
+    }).join('');
+    const pct = possible > 0 ? Math.round((done / possible) * 100) : 0;
+    return `
+      <div class="monthly-b-card">
+        <div class="monthly-b-header">
+          <span class="monthly-b-name" title="${escHtml(b.name)}">${escHtml(b.name)}</span>
+          ${trendBadge(calcTrend(b, today))}
+          <span class="monthly-b-pct">${pct}%</span>
+        </div>
+        <div class="monthly-progress-bar">
+          <div class="monthly-progress-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="monthly-dot-row">${dots}</div>
+      </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="monthly-summary">
+      <div class="monthly-pct-big">${overallPct}%</div>
+      <div class="monthly-pct-label">Overall completion — ${label}</div>
+    </div>
+    <div class="monthly-behaviour-list">${bCards}</div>`;
+}
+
 /* ═════════════════════════════════════════════
    RENDER: TASKS
 ═════════════════════════════════════════════ */
@@ -1952,7 +2437,11 @@ function renderTasks() {
   const today     = todayStr();
   const container = document.getElementById('task-list-container');
   const emptyEl   = document.getElementById('task-empty');
-  const active    = tasks.filter(t => !t.completed);
+
+  const active = tasks.filter(t => !t.completed &&
+    (taskPriorityFilter === 'all' || t.priority === taskPriorityFilter));
+  const completed = tasks.filter(t => t.completed &&
+    (taskPriorityFilter === 'all' || t.priority === taskPriorityFilter));
 
   const overdue  = active.filter(t => t.dueDate < today)
     .sort((a,b) => priorityOrder(a) - priorityOrder(b) || a.dueDate.localeCompare(b.dueDate));
@@ -1960,7 +2449,6 @@ function renderTasks() {
     .sort((a,b) => priorityOrder(a) - priorityOrder(b));
   const upcoming = active.filter(t => t.dueDate > today)
     .sort((a,b) => priorityOrder(a) - priorityOrder(b) || a.dueDate.localeCompare(b.dueDate));
-  const completed = tasks.filter(t => t.completed);
 
   if (!tasks.length) {
     container.innerHTML = '';
@@ -1968,6 +2456,14 @@ function renderTasks() {
     return;
   }
   emptyEl.classList.add('hidden');
+
+  // Show a hint when filter returns nothing but tasks exist
+  if (!active.length && !completed.length) {
+    container.innerHTML = `<div class="empty-state">
+      <p>No ${taskPriorityFilter} priority tasks.</p>
+    </div>`;
+    return;
+  }
 
   let html = '';
   if (overdue.length)  html += `<div class="section-header overdue-hdr">🔴 Overdue</div><div class="task-list">${overdue.map(t => taskCard(t,'overdue')).join('')}</div>`;
@@ -2193,6 +2689,43 @@ document.getElementById('task-form').addEventListener('submit', async (e) => {
 document.getElementById('show-completed-btn').addEventListener('click', () => {
   showCompleted = !showCompleted;
   renderTasks();
+});
+
+/* ═════════════════════════════════════════════
+   BEHAVIOUR VIEW TABS + PERIOD NAV
+═════════════════════════════════════════════ */
+document.querySelectorAll('.bview-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    behaviourView = tab.dataset.view;
+    weekOffset = 0; monthOffset = 0;
+    document.querySelectorAll('.bview-tab').forEach(t =>
+      t.classList.toggle('active', t === tab));
+    renderBehaviours();
+  });
+});
+
+document.getElementById('period-prev').addEventListener('click', () => {
+  if (behaviourView === 'weekly')  weekOffset--;
+  else if (behaviourView === 'monthly') monthOffset--;
+  renderBehaviours();
+});
+
+document.getElementById('period-next').addEventListener('click', () => {
+  if (behaviourView === 'weekly'  && weekOffset  < 0) weekOffset++;
+  else if (behaviourView === 'monthly' && monthOffset < 0) monthOffset++;
+  renderBehaviours();
+});
+
+/* ═════════════════════════════════════════════
+   TASK PRIORITY FILTER
+═════════════════════════════════════════════ */
+document.querySelectorAll('.pf-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    taskPriorityFilter = btn.dataset.priority;
+    document.querySelectorAll('.pf-btn').forEach(b =>
+      b.classList.toggle('active', b === btn));
+    renderTasks();
+  });
 });
 </script>
 </body>
