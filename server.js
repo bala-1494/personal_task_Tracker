@@ -5,7 +5,7 @@ const { Firestore } = require('@google-cloud/firestore');
 const path = require('path');
 
 const app = express();
-const db = new Firestore();
+const db  = new Firestore();
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -23,44 +23,160 @@ function handleError(res, err, context = '') {
 }
 
 /* ─────────────────────────────────────────────
-   USERS
-   POST   /api/users          – find or create by username
-   GET    /api/users/:id      – fetch user profile
+   USERS / AUTH
+
+   POST   /api/users                    – register new user (name + username + pin)
+   POST   /api/auth/login               – login with username + pin
+   GET    /api/check-username/:username – check availability (returns name if taken)
+   GET    /api/users/:id                – fetch profile (returns pinSet flag)
+   PATCH  /api/users/:id/credentials   – set username + pin for existing users (migration)
 ───────────────────────────────────────────── */
+
+// Register new user
 app.post('/api/users', async (req, res) => {
   try {
-    const username = (req.body.username || '').trim().slice(0, 40);
-    if (!username) return res.status(400).json({ error: 'Username is required' });
+    const name     = (req.body.name || '').trim().slice(0, 40);
+    const username = (req.body.username || '').trim().toLowerCase().slice(0, 30);
+    const pin      = (req.body.pin || '').trim();
 
-    // Return existing user with this username
+    if (!name)                         return res.status(400).json({ error: 'Name is required' });
+    if (!username)                     return res.status(400).json({ error: 'Username is required' });
+    if (!/^[a-z0-9_]{1,30}$/.test(username))
+      return res.status(400).json({ error: 'Username may only contain letters, numbers, and underscores' });
+    if (!/^\d{4}$/.test(pin))          return res.status(400).json({ error: 'PIN must be exactly 4 digits' });
+
     const snap = await db.collection('users')
       .where('username', '==', username)
       .limit(1)
       .get();
 
     if (!snap.empty) {
-      const doc = snap.docs[0];
-      return res.json({ id: doc.id, username: doc.data().username });
+      return res.status(409).json({ error: 'Username already taken' });
     }
 
-    // Create new user
     const ref = await db.collection('users').add({
+      name,
       username,
+      pin,
       createdAt: new Date().toISOString(),
     });
-    res.status(201).json({ id: ref.id, username });
+
+    res.status(201).json({ id: ref.id, name, username });
   } catch (err) {
     handleError(res, err, 'POST /api/users');
   }
 });
 
+// Login with username + PIN
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const username = (req.body.username || '').trim().toLowerCase();
+    const pin      = (req.body.pin || '').trim();
+
+    if (!username) return res.status(400).json({ error: 'Username is required' });
+    if (!pin)      return res.status(400).json({ error: 'PIN is required' });
+
+    const snap = await db.collection('users')
+      .where('username', '==', username)
+      .limit(1)
+      .get();
+
+    if (snap.empty) {
+      return res.status(401).json({ error: 'Invalid username or PIN' });
+    }
+
+    const doc  = snap.docs[0];
+    const data = doc.data();
+
+    if (data.pin !== pin) {
+      return res.status(401).json({ error: 'Invalid username or PIN' });
+    }
+
+    res.json({ id: doc.id, name: data.name || data.username, username: data.username });
+  } catch (err) {
+    handleError(res, err, 'POST /api/auth/login');
+  }
+});
+
+// Check username availability; returns name if account exists (for sign-in flow)
+app.get('/api/check-username/:username', async (req, res) => {
+  try {
+    const username = (req.params.username || '').trim().toLowerCase();
+    if (!username) return res.status(400).json({ error: 'Username required' });
+
+    const snap = await db.collection('users')
+      .where('username', '==', username)
+      .limit(1)
+      .get();
+
+    if (snap.empty) {
+      return res.json({ available: true });
+    }
+
+    const data = snap.docs[0].data();
+    res.json({ available: false, name: data.name || data.username });
+  } catch (err) {
+    handleError(res, err, 'GET /api/check-username');
+  }
+});
+
+// Get user profile
 app.get('/api/users/:userId', async (req, res) => {
   try {
     const doc = await db.collection('users').doc(req.params.userId).get();
     if (!doc.exists) return res.status(404).json({ error: 'User not found' });
-    res.json({ id: doc.id, username: doc.data().username });
+    const data = doc.data();
+    res.json({
+      id:       doc.id,
+      name:     data.name || data.username,
+      username: data.username,
+      pinSet:   !!data.pin,
+    });
   } catch (err) {
     handleError(res, err, 'GET /api/users/:userId');
+  }
+});
+
+// Set credentials for existing users without a PIN (migration)
+app.patch('/api/users/:userId/credentials', async (req, res) => {
+  try {
+    const username = (req.body.username || '').trim().toLowerCase().slice(0, 30);
+    const pin      = (req.body.pin || '').trim();
+
+    if (!username) return res.status(400).json({ error: 'Username is required' });
+    if (!/^[a-z0-9_]{1,30}$/.test(username))
+      return res.status(400).json({ error: 'Username may only contain letters, numbers, and underscores' });
+    if (!/^\d{4}$/.test(pin)) return res.status(400).json({ error: 'PIN must be exactly 4 digits' });
+
+    // Ensure username not taken by a different user
+    const snap = await db.collection('users')
+      .where('username', '==', username)
+      .limit(1)
+      .get();
+
+    if (!snap.empty && snap.docs[0].id !== req.params.userId) {
+      return res.status(409).json({ error: 'Username already taken' });
+    }
+
+    const userRef = db.collection('users').doc(req.params.userId);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) return res.status(404).json({ error: 'User not found' });
+
+    const existing = userDoc.data();
+    const update   = { username, pin };
+
+    // Preserve existing display name — old accounts stored the display name in the username field
+    if (!existing.name) {
+      update.name = existing.username || username;
+    }
+
+    await userRef.update(update);
+
+    const updated = await userRef.get();
+    const d       = updated.data();
+    res.json({ id: req.params.userId, name: d.name || d.username, username: d.username });
+  } catch (err) {
+    handleError(res, err, 'PATCH /api/users/:userId/credentials');
   }
 });
 
@@ -109,7 +225,6 @@ app.patch('/api/users/:userId/behaviours/:id', async (req, res) => {
     if (!Array.isArray(completedDates))
       return res.status(400).json({ error: 'completedDates must be an array' });
 
-    // Sanitise: only valid YYYY-MM-DD strings, deduplicate
     const cleaned = [...new Set(
       completedDates.filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
     )];
@@ -161,7 +276,7 @@ app.post('/api/users/:userId/tasks', async (req, res) => {
     const priority = req.body.priority;
     const dueDate  = req.body.dueDate;
 
-    if (!name)                         return res.status(400).json({ error: 'Task name is required' });
+    if (!name)                           return res.status(400).json({ error: 'Task name is required' });
     if (!VALID_PRIORITIES.has(priority)) return res.status(400).json({ error: 'Priority must be high, medium, or low' });
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) return res.status(400).json({ error: 'Due date must be YYYY-MM-DD' });
 

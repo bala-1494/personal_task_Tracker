@@ -97,9 +97,9 @@
     }
 
     /* ─────────────────────────────────────────────
-       WELCOME SCREEN
+       WELCOME / AUTH SHARED BASE
     ───────────────────────────────────────────── */
-    #welcome-screen {
+    #welcome-screen, #auth-screen, #migration-screen {
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
@@ -803,6 +803,150 @@
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ─────────────────────────────────────────────
+       AUTH SCREEN (multi-step: register / sign-in)
+    ───────────────────────────────────────────── */
+    .auth-tabs {
+      display: flex;
+      width: 100%;
+      max-width: 360px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      margin-bottom: 1.5rem;
+      gap: 4px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 0.55rem;
+      background: none;
+      border: none;
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .auth-tab.active {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .auth-panel {
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .auth-error {
+      color: var(--red);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 0.25rem 0 0.1rem;
+      min-height: 1.4rem;
+    }
+
+    .auth-welcome-back {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
+
+    .auth-welcome-back strong { color: var(--text); }
+
+    .auth-link {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      margin-top: 0.75rem;
+      display: block;
+      width: 100%;
+      text-align: center;
+      transition: color var(--transition);
+    }
+
+    .auth-link:hover { color: var(--text); }
+
+    /* PIN boxes */
+    .pin-row {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      margin: 0.4rem 0 1rem;
+    }
+
+    .pin-box {
+      width: 56px;
+      height: 60px;
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 800;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      caret-color: transparent;
+    }
+
+    .pin-box:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.2);
+    }
+
+    .pin-box.filled { border-color: var(--accent2); }
+
+    /* ─────────────────────────────────────────────
+       MIGRATION SCREEN
+    ───────────────────────────────────────────── */
+    .migration-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      line-height: 1;
+    }
+
+    .migration-subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+      max-width: 300px;
+      line-height: 1.5;
+    }
+
+    /* ─────────────────────────────────────────────
+       APP HEADER — logout button
+    ───────────────────────────────────────────── */
+    .app-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logout-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      transition: color var(--transition), background var(--transition);
+      flex-shrink: 0;
+    }
+
+    .logout-btn:hover { color: var(--red); background: var(--red-soft); }
   </style>
 </head>
 <body>
@@ -816,23 +960,98 @@
 <div id="toast"></div>
 
 <!-- ══════════════════════════════════════════════
-     WELCOME SCREEN
+     AUTH SCREEN  (register + sign-in flow)
 ══════════════════════════════════════════════ -->
-<div id="welcome-screen" class="hidden">
+<div id="auth-screen" class="hidden">
   <div class="welcome-logo">&#9997;&#65039;</div>
   <h1 class="welcome-title">Trakr</h1>
   <p class="welcome-tagline">Track your habits. Tame your tasks.</p>
-  <form class="welcome-form" id="welcome-form" novalidate>
-    <label for="username-input">What should we call you?</label>
-    <input
-      type="text"
-      id="username-input"
-      class="welcome-input"
-      placeholder="Your name…"
-      maxlength="40"
-      autocomplete="off"
-    />
-    <button type="submit" class="btn-primary" id="welcome-btn" disabled>Let's Begin &rarr;</button>
+
+  <!-- Tab bar: New here / Sign in -->
+  <div class="auth-tabs">
+    <button class="auth-tab active" data-mode="register">New here</button>
+    <button class="auth-tab" data-mode="signin">Sign in</button>
+  </div>
+
+  <!-- ── REGISTER PANEL ── -->
+  <div id="register-panel" class="auth-panel">
+    <form id="register-form" class="welcome-form" novalidate>
+      <label for="reg-name-input">Your name</label>
+      <input type="text" id="reg-name-input" class="welcome-input"
+        placeholder="e.g. Alice" maxlength="40" autocomplete="off" />
+
+      <label for="reg-username-input">Choose a username</label>
+      <input type="text" id="reg-username-input" class="welcome-input"
+        placeholder="e.g. alice123" maxlength="30" autocomplete="off"
+        spellcheck="false" autocapitalize="none" />
+
+      <label>Choose a 4-digit PIN</label>
+      <div class="pin-row" id="reg-pin-row">
+        <input type="tel" maxlength="1" class="pin-box" inputmode="numeric" />
+        <input type="tel" maxlength="1" class="pin-box" inputmode="numeric" />
+        <input type="tel" maxlength="1" class="pin-box" inputmode="numeric" />
+        <input type="tel" maxlength="1" class="pin-box" inputmode="numeric" />
+      </div>
+
+      <div id="reg-error" class="auth-error hidden"></div>
+      <button type="submit" class="btn-primary" id="reg-btn" disabled>Get Started &rarr;</button>
+    </form>
+  </div>
+
+  <!-- ── SIGN IN: STEP 1 — username ── -->
+  <div id="signin-username-panel" class="auth-panel hidden">
+    <form id="signin-username-form" class="welcome-form" novalidate>
+      <label for="si-username-input">Username</label>
+      <input type="text" id="si-username-input" class="welcome-input"
+        placeholder="Your username" maxlength="30" autocomplete="off"
+        spellcheck="false" autocapitalize="none" />
+      <div id="si-username-error" class="auth-error hidden"></div>
+      <button type="submit" class="btn-primary" id="si-username-btn" disabled>Continue &rarr;</button>
+    </form>
+  </div>
+
+  <!-- ── SIGN IN: STEP 2 — PIN ── -->
+  <div id="signin-pin-panel" class="auth-panel hidden">
+    <p class="auth-welcome-back">Welcome back, <strong id="signin-display-name"></strong>!</p>
+    <form id="signin-pin-form" class="welcome-form" novalidate>
+      <label>Enter your PIN</label>
+      <div class="pin-row" id="si-pin-row">
+        <input type="tel" maxlength="1" class="pin-box" inputmode="numeric" />
+        <input type="tel" maxlength="1" class="pin-box" inputmode="numeric" />
+        <input type="tel" maxlength="1" class="pin-box" inputmode="numeric" />
+        <input type="tel" maxlength="1" class="pin-box" inputmode="numeric" />
+      </div>
+      <div id="si-pin-error" class="auth-error hidden"></div>
+      <button type="submit" class="btn-primary" id="si-pin-btn" disabled>Sign In &rarr;</button>
+    </form>
+    <button type="button" class="auth-link" id="not-you-btn">Not you? Switch account</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MIGRATION SCREEN  (existing users without PIN)
+══════════════════════════════════════════════ -->
+<div id="migration-screen" class="hidden">
+  <div class="migration-icon">&#128274;</div>
+  <h2 class="welcome-title" style="font-size:1.75rem">Secure Your Account</h2>
+  <p class="migration-subtitle" id="migration-subtitle">
+    Hi <strong id="migration-name"></strong>! Choose a username and PIN to keep your data safe.
+  </p>
+  <form id="migration-form" class="welcome-form" novalidate>
+    <label for="mig-username-input">Choose a username</label>
+    <input type="text" id="mig-username-input" class="welcome-input"
+      placeholder="e.g. alice123" maxlength="30" autocomplete="off"
+      spellcheck="false" autocapitalize="none" />
+
+    <label>Choose a 4-digit PIN</label>
+    <div class="pin-row" id="mig-pin-row">
+      <input type="tel" maxlength="1" class="pin-box" inputmode="numeric" />
+      <input type="tel" maxlength="1" class="pin-box" inputmode="numeric" />
+      <input type="tel" maxlength="1" class="pin-box" inputmode="numeric" />
+      <input type="tel" maxlength="1" class="pin-box" inputmode="numeric" />
+    </div>
+    <div id="mig-error" class="auth-error hidden"></div>
+    <button type="submit" class="btn-primary" id="mig-btn" disabled>Save &amp; Continue &rarr;</button>
   </form>
 </div>
 
@@ -841,7 +1060,16 @@
 ══════════════════════════════════════════════ -->
 <div id="app" class="hidden">
   <header class="app-header">
-    <div class="greeting" id="greeting">Good morning, friend</div>
+    <div class="app-header-row">
+      <div class="greeting" id="greeting">Good morning, friend</div>
+      <button class="logout-btn" id="logout-btn" title="Sign out" aria-label="Sign out">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </button>
+    </div>
     <nav class="tab-bar" role="tablist">
       <button class="tab-btn active" role="tab" data-tab="dashboard">Dashboard</button>
       <button class="tab-btn" role="tab" data-tab="behaviours">Behaviours</button>
@@ -996,12 +1224,18 @@ async function apiFetch(path, { method = 'GET', body } = {}) {
    STATE
 ═════════════════════════════════════════════ */
 let userId   = localStorage.getItem('trakr_userId');
-let username = localStorage.getItem('trakr_username');
-let behaviours     = [];
-let tasks          = [];
-let showCompleted  = false;
+let username = localStorage.getItem('trakr_username');  // login username
+let name     = localStorage.getItem('trakr_name');      // display name
+let loggedIn = localStorage.getItem('trakr_loggedIn') === 'true';
+
+let behaviours       = [];
+let tasks            = [];
+let showCompleted    = false;
 let selectedPriority = null;
-let activeTab      = 'dashboard';
+let activeTab        = 'dashboard';
+
+// Tracks the username entered during step-1 of sign-in (before PIN)
+let pendingSignInUsername = '';
 
 /* ═════════════════════════════════════════════
    LOADING & TOAST
@@ -1027,10 +1261,25 @@ function showToast(msg) {
 }
 
 /* ═════════════════════════════════════════════
-   BOOT
+   BOOT & AUTH ROUTING
 ═════════════════════════════════════════════ */
-const welcomeScreen = document.getElementById('welcome-screen');
-const appEl         = document.getElementById('app');
+const authScreen      = document.getElementById('auth-screen');
+const migrationScreen = document.getElementById('migration-screen');
+const appEl           = document.getElementById('app');
+
+function hideAllScreens() {
+  authScreen.classList.add('hidden');
+  migrationScreen.classList.add('hidden');
+  appEl.classList.add('hidden');
+}
+
+function clearStoredUser() {
+  localStorage.removeItem('trakr_userId');
+  localStorage.removeItem('trakr_username');
+  localStorage.removeItem('trakr_name');
+  localStorage.removeItem('trakr_loggedIn');
+  userId = null; username = null; name = null; loggedIn = false;
+}
 
 async function loadData() {
   [behaviours, tasks] = await Promise.all([
@@ -1041,8 +1290,32 @@ async function loadData() {
 
 async function bootApp() {
   try {
-    await loadData();
-    welcomeScreen.classList.add('hidden');
+    const [profile, bList, tList] = await Promise.all([
+      apiFetch(`/users/${userId}`),
+      apiFetch(`/users/${userId}/behaviours`),
+      apiFetch(`/users/${userId}/tasks`),
+    ]);
+
+    // Keep local name in sync with server
+    if (profile.name) {
+      name = profile.name;
+      localStorage.setItem('trakr_name', name);
+    }
+
+    // Existing user has no PIN yet — prompt migration
+    if (!profile.pinSet) {
+      showLoading(false);
+      showMigration(name || profile.name);
+      // Pre-load data so the app is ready once they complete migration
+      behaviours = bList;
+      tasks = tList;
+      return;
+    }
+
+    behaviours = bList;
+    tasks = tList;
+
+    hideAllScreens();
     appEl.classList.remove('hidden');
     updateGreeting();
     renderAll();
@@ -1050,64 +1323,391 @@ async function bootApp() {
   } catch (err) {
     console.error('Boot failed', err);
     showLoading(false);
-    // If user not found in DB, clear stale localStorage and show welcome
-    localStorage.removeItem('trakr_userId');
-    localStorage.removeItem('trakr_username');
-    userId = null;
-    username = null;
-    showWelcome();
+    clearStoredUser();
+    showAuthScreen('register');
   }
 }
 
-function showWelcome() {
+// Route on start: persistent session → boot; stored userId but no session → check pin;
+// totally new → show register
+async function routeOnStart() {
+  if (userId && loggedIn) {
+    bootApp();
+    return;
+  }
+
+  if (userId) {
+    // Know the user but session expired — check if migration needed
+    try {
+      const profile = await apiFetch(`/users/${userId}`);
+      // Keep name up to date
+      if (profile.name) { name = profile.name; localStorage.setItem('trakr_name', name); }
+
+      if (!profile.pinSet) {
+        showLoading(false);
+        showMigration(name || profile.name);
+      } else {
+        // Go straight to PIN step — we know their display name
+        showLoading(false);
+        showAuthScreen('pin');
+      }
+    } catch {
+      showLoading(false);
+      clearStoredUser();
+      showAuthScreen('register');
+    }
+    return;
+  }
+
   showLoading(false);
-  welcomeScreen.classList.remove('hidden');
-  appEl.classList.add('hidden');
-  document.getElementById('username-input').focus();
+  showAuthScreen('register');
 }
 
-// If we have a stored userId, attempt to load directly
-if (userId && username) {
-  bootApp();
-} else {
-  showWelcome();
+routeOnStart();
+
+/* ═════════════════════════════════════════════
+   AUTH SCREEN  — show / panel switching
+═════════════════════════════════════════════ */
+function showAuthScreen(panel = 'register') {
+  hideAllScreens();
+  showLoading(false);
+  authScreen.classList.remove('hidden');
+
+  const isSignin = panel !== 'register';
+  authScreen.querySelectorAll('.auth-tab').forEach(t =>
+    t.classList.toggle('active',
+      isSignin ? t.dataset.mode === 'signin' : t.dataset.mode === 'register'));
+
+  document.getElementById('register-panel').classList.toggle('hidden', panel !== 'register');
+  document.getElementById('signin-username-panel').classList.toggle('hidden', panel !== 'signin');
+  document.getElementById('signin-pin-panel').classList.toggle('hidden', panel !== 'pin');
+
+  // Clear errors
+  ['reg-error','si-username-error','si-pin-error'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = ''; el.classList.add('hidden');
+  });
+
+  // Clear PIN boxes when switching to pin panel
+  if (panel === 'pin') {
+    clearPinRow('si-pin-row');
+    document.getElementById('signin-display-name').textContent = name || username || '';
+  }
+
+  // Focus first input
+  setTimeout(() => {
+    if (panel === 'register') document.getElementById('reg-name-input').focus();
+    else if (panel === 'signin') document.getElementById('si-username-input').focus();
+    else if (panel === 'pin') {
+      const box = document.querySelector('#si-pin-row .pin-box');
+      if (box) box.focus();
+    }
+  }, 50);
+}
+
+// Auth tab click handler
+authScreen.querySelectorAll('.auth-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const mode = tab.dataset.mode;
+    showAuthScreen(mode === 'register' ? 'register' : 'signin');
+  });
+});
+
+/* ═════════════════════════════════════════════
+   MIGRATION SCREEN
+═════════════════════════════════════════════ */
+function showMigration(displayName) {
+  hideAllScreens();
+  document.getElementById('migration-name').textContent = displayName || 'there';
+  migrationScreen.classList.remove('hidden');
+  clearPinRow('mig-pin-row');
+  const usernameEl = document.getElementById('mig-username-input');
+  usernameEl.value = '';
+  document.getElementById('mig-error').textContent = '';
+  document.getElementById('mig-error').classList.add('hidden');
+  document.getElementById('mig-btn').disabled = true;
+  setTimeout(() => usernameEl.focus(), 50);
 }
 
 /* ═════════════════════════════════════════════
-   WELCOME FORM
+   PIN INPUT  — helpers
 ═════════════════════════════════════════════ */
-const usernameInput = document.getElementById('username-input');
-const welcomeBtn    = document.getElementById('welcome-btn');
-const welcomeForm   = document.getElementById('welcome-form');
+function initPinRow(rowId, onChange) {
+  const boxes = [...document.querySelectorAll(`#${rowId} .pin-box`)];
+  boxes.forEach((box, i) => {
+    box.addEventListener('input', () => {
+      box.value = box.value.replace(/\D/g, '').slice(-1);
+      box.classList.toggle('filled', box.value !== '');
+      if (box.value && i < boxes.length - 1) boxes[i + 1].focus();
+      onChange(getPinValue(rowId));
+    });
 
-usernameInput.addEventListener('input', () => {
-  welcomeBtn.disabled = usernameInput.value.trim().length === 0;
-});
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !box.value && i > 0) {
+        boxes[i - 1].value = '';
+        boxes[i - 1].classList.remove('filled');
+        boxes[i - 1].focus();
+        onChange(getPinValue(rowId));
+      }
+    });
 
-welcomeForm.addEventListener('submit', async (e) => {
+    box.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const digits = (e.clipboardData || window.clipboardData)
+        .getData('text').replace(/\D/g, '').slice(0, 4);
+      digits.split('').forEach((d, j) => {
+        if (boxes[j]) { boxes[j].value = d; boxes[j].classList.add('filled'); }
+      });
+      boxes[Math.min(digits.length, boxes.length - 1)].focus();
+      onChange(getPinValue(rowId));
+    });
+  });
+}
+
+function getPinValue(rowId) {
+  return [...document.querySelectorAll(`#${rowId} .pin-box`)].map(b => b.value).join('');
+}
+
+function clearPinRow(rowId) {
+  document.querySelectorAll(`#${rowId} .pin-box`).forEach(b => {
+    b.value = ''; b.classList.remove('filled');
+  });
+}
+
+/* ─── Register ─────────────────────────────── */
+let regPinValue = '';
+initPinRow('reg-pin-row', (val) => { regPinValue = val; updateRegBtn(); });
+
+const regNameInput     = document.getElementById('reg-name-input');
+const regUsernameInput = document.getElementById('reg-username-input');
+const regBtn           = document.getElementById('reg-btn');
+const regError         = document.getElementById('reg-error');
+
+function updateRegBtn() {
+  regBtn.disabled = !(
+    regNameInput.value.trim().length > 0 &&
+    regUsernameInput.value.trim().length > 0 &&
+    regPinValue.length === 4
+  );
+}
+
+regNameInput.addEventListener('input', updateRegBtn);
+regUsernameInput.addEventListener('input', updateRegBtn);
+
+document.getElementById('register-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const name = usernameInput.value.trim();
-  if (!name) return;
+  const n  = regNameInput.value.trim();
+  const u  = regUsernameInput.value.trim().toLowerCase();
+  const p  = regPinValue;
 
-  welcomeBtn.disabled = true;
-  welcomeBtn.textContent = 'Setting up…';
+  if (!n || !u || p.length !== 4) return;
+  if (!/^[a-z0-9_]{1,30}$/.test(u)) {
+    showAuthError('reg-error', 'Username can only contain letters, numbers, and underscores.');
+    return;
+  }
+
+  regBtn.disabled = true;
+  regBtn.textContent = 'Creating account…';
+  hideAuthError('reg-error');
 
   try {
-    const user = await apiFetch('/users', { method: 'POST', body: { username: name } });
-    userId   = user.id;
-    username = user.username;
-    localStorage.setItem('trakr_userId',   userId);
-    localStorage.setItem('trakr_username', username);
-
+    const user = await apiFetch('/users', { method: 'POST', body: { name: n, username: u, pin: p } });
+    storeSession(user.id, user.username, user.name);
     showLoading(true);
     await bootApp();
   } catch (err) {
-    console.error(err);
-    showToast('Could not connect. Please try again.');
-    welcomeBtn.disabled = false;
-    welcomeBtn.textContent = "Let's Begin →";
+    showAuthError('reg-error', err.message || 'Could not create account. Please try again.');
+    regBtn.disabled = false;
+    regBtn.textContent = 'Get Started →';
   }
 });
+
+/* ─── Sign-in: step 1 — username ─────────────── */
+const siUsernameInput = document.getElementById('si-username-input');
+const siUsernameBtn   = document.getElementById('si-username-btn');
+
+siUsernameInput.addEventListener('input', () => {
+  siUsernameBtn.disabled = siUsernameInput.value.trim().length === 0;
+  hideAuthError('si-username-error');
+});
+
+document.getElementById('signin-username-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const u = siUsernameInput.value.trim().toLowerCase();
+  if (!u) return;
+
+  siUsernameBtn.disabled = true;
+  siUsernameBtn.textContent = 'Checking…';
+  hideAuthError('si-username-error');
+
+  try {
+    const result = await apiFetch(`/check-username/${encodeURIComponent(u)}`);
+    if (result.available) {
+      showAuthError('si-username-error', 'Username not found. Check spelling or create an account.');
+      siUsernameBtn.disabled = false;
+      siUsernameBtn.textContent = 'Continue →';
+      return;
+    }
+    // Username exists — go to PIN step
+    pendingSignInUsername = u;
+    document.getElementById('signin-display-name').textContent = result.name;
+    clearPinRow('si-pin-row');
+    document.getElementById('si-pin-btn').disabled = true;
+    hideAuthError('si-pin-error');
+
+    document.getElementById('signin-username-panel').classList.add('hidden');
+    document.getElementById('signin-pin-panel').classList.remove('hidden');
+    setTimeout(() => {
+      const box = document.querySelector('#si-pin-row .pin-box');
+      if (box) box.focus();
+    }, 50);
+  } catch (err) {
+    showAuthError('si-username-error', 'Could not connect. Please try again.');
+    siUsernameBtn.disabled = false;
+    siUsernameBtn.textContent = 'Continue →';
+  }
+});
+
+/* ─── Sign-in: step 2 — PIN ─────────────────── */
+let siPinValue = '';
+initPinRow('si-pin-row', (val) => {
+  siPinValue = val;
+  document.getElementById('si-pin-btn').disabled = val.length !== 4;
+  hideAuthError('si-pin-error');
+});
+
+document.getElementById('signin-pin-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (siPinValue.length !== 4) return;
+
+  const btn = document.getElementById('si-pin-btn');
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  hideAuthError('si-pin-error');
+
+  try {
+    const user = await apiFetch('/auth/login', {
+      method: 'POST',
+      body: { username: pendingSignInUsername, pin: siPinValue },
+    });
+    storeSession(user.id, user.username, user.name);
+    showLoading(true);
+    await bootApp();
+  } catch (err) {
+    showAuthError('si-pin-error', 'Incorrect PIN. Please try again.');
+    clearPinRow('si-pin-row');
+    siPinValue = '';
+    btn.disabled = true;
+    btn.textContent = 'Sign In →';
+    setTimeout(() => {
+      const box = document.querySelector('#si-pin-row .pin-box');
+      if (box) box.focus();
+    }, 50);
+  }
+});
+
+// "Not you?" — go back to username step
+document.getElementById('not-you-btn').addEventListener('click', () => {
+  pendingSignInUsername = '';
+  siUsernameInput.value = '';
+  siUsernameBtn.disabled = true;
+  document.getElementById('signin-pin-panel').classList.add('hidden');
+  document.getElementById('signin-username-panel').classList.remove('hidden');
+  setTimeout(() => siUsernameInput.focus(), 50);
+});
+
+/* ─── Migration form ─────────────────────────── */
+let migPinValue = '';
+initPinRow('mig-pin-row', (val) => { migPinValue = val; updateMigBtn(); });
+
+const migUsernameInput = document.getElementById('mig-username-input');
+const migBtn           = document.getElementById('mig-btn');
+
+function updateMigBtn() {
+  migBtn.disabled = !(migUsernameInput.value.trim().length > 0 && migPinValue.length === 4);
+}
+
+migUsernameInput.addEventListener('input', () => {
+  updateMigBtn();
+  hideAuthError('mig-error');
+});
+
+document.getElementById('migration-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const u = migUsernameInput.value.trim().toLowerCase();
+  const p = migPinValue;
+  if (!u || p.length !== 4) return;
+
+  if (!/^[a-z0-9_]{1,30}$/.test(u)) {
+    showAuthError('mig-error', 'Username can only contain letters, numbers, and underscores.');
+    return;
+  }
+
+  migBtn.disabled = true;
+  migBtn.textContent = 'Saving…';
+  hideAuthError('mig-error');
+
+  try {
+    const user = await apiFetch(`/users/${userId}/credentials`, {
+      method: 'PATCH',
+      body: { username: u, pin: p },
+    });
+    // Update stored session with new username/name
+    storeSession(userId, user.username, user.name);
+    showLoading(true);
+
+    // Data was pre-loaded in bootApp when migration was triggered
+    hideAllScreens();
+    appEl.classList.remove('hidden');
+    updateGreeting();
+    renderAll();
+    showLoading(false);
+  } catch (err) {
+    showAuthError('mig-error', err.message || 'Could not save. Please try again.');
+    migBtn.disabled = false;
+    migBtn.textContent = 'Save & Continue →';
+  }
+});
+
+/* ─── Logout ─────────────────────────────────── */
+document.getElementById('logout-btn').addEventListener('click', () => {
+  localStorage.removeItem('trakr_loggedIn');
+  loggedIn = false;
+  pendingSignInUsername = '';
+  hideAllScreens();
+  // If we know who they are, go straight to sign-in (username → PIN)
+  if (username) {
+    showAuthScreen('signin');
+    siUsernameInput.value = username;
+    siUsernameBtn.disabled = false;
+  } else {
+    showAuthScreen('signin');
+  }
+});
+
+/* ─── Shared auth helpers ────────────────────── */
+function storeSession(id, uname, displayName) {
+  userId   = id;
+  username = uname;
+  name     = displayName;
+  loggedIn = true;
+  localStorage.setItem('trakr_userId',    id);
+  localStorage.setItem('trakr_username',  uname);
+  localStorage.setItem('trakr_name',      displayName);
+  localStorage.setItem('trakr_loggedIn',  'true');
+}
+
+function showAuthError(elId, msg) {
+  const el = document.getElementById(elId);
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+function hideAuthError(elId) {
+  const el = document.getElementById(elId);
+  el.textContent = '';
+  el.classList.add('hidden');
+}
 
 /* ═════════════════════════════════════════════
    GREETING
@@ -1115,7 +1715,7 @@ welcomeForm.addEventListener('submit', async (e) => {
 function updateGreeting() {
   const h = new Date().getHours();
   const period = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
-  document.getElementById('greeting').textContent = `Good ${period}, ${username} 👋`;
+  document.getElementById('greeting').textContent = `Good ${period}, ${name || username} 👋`;
 }
 
 /* ═════════════════════════════════════════════
